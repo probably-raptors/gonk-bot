@@ -1,3 +1,17 @@
+# dev directories
+venv/
+
+# dev files
+*.egg-info
+**/*.pyc
+**/*.log
+**/*~
+**/\#*
+**/*emacs*
+
+# security concerns
+bot/config.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
