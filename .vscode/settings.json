@@ -1,0 +1,8 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.jediEnabled": false,
+    "python.languageServer": "Microsoft",
+    "python.autoComplete.extraPaths": [
+        "/home/bryan/dev/squirrel-sweeper-bot"
+    ],
+}
