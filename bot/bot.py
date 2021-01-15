@@ -1,8 +1,10 @@
-import os
-import config
-import discord
 from discord.ext import commands
-
+try:
+        from . import config
+except:
+        import config
+import discord
+import os
 
 config.init()
 
@@ -18,7 +20,6 @@ bot = commands.Bot(config.prefix, intents=intents)
 for folder in os.listdir("modules"):
 	if os.path.exists(os.path.join("modules", folder, "cog.py")):
 		bot.load_extension(f"modules.{ folder }.cog")
-
 
 @bot.event
 async def on_ready():

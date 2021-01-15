@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import os
 
-
 def init():
     global prefix, token, guild_id
     prefix = "./"
