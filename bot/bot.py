@@ -1,6 +1,7 @@
 from discord.ext import commands
-import config
 import discord
+import random
+import config
 import os
 
 config.init()
