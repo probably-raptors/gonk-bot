@@ -12,7 +12,7 @@ def init():
 
     # leave these alone
     DISCORD_TOKEN = "Nzk5NjgzODcwNzM1ODU5NzEy.YAHJpA.nJ5GfTpRNfgdvo2tras_46hOyCk"
-    token = os.getenv(DISCORD_TOKEN)
+    token = DISCORD_TOKEN
 
-    DISCORD_GUILD = 420371160312709130
-    guild_id = os.getenv(DISCORD_GUILD)
+    DISCORD_GUILD = "420371160312709130"
+    guild_id = DISCORD_GUILD

@@ -25,7 +25,7 @@ for folder in os.listdir("bot/modules"):
 
 @bot.event
 async def on_ready():
-	print("Squirrel Sweeper Bot reporting for duty, sir!")
+	print("GONK")
 	print(f"I am currently logged in as { bot.user }")
 
 
