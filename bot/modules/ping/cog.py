@@ -10,7 +10,7 @@ class PingCog(commands.Cog):
 	async def ping(self, ctx: commands.Context):
 		""" A simple command that responds to a ping """
 
-		with open("modules/ping/responses.txt") as responses:
+		with open("bot/modules/ping/responses.txt") as responses:
 			await ctx.send(random.choice(responses.readlines()))
 
 
