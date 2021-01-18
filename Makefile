@@ -12,6 +12,9 @@ run:
 	@echo "==> Starting Squirrel Bot"
 	@./venv/bin/python ./bot/bot.py
 
+install:
+	@echo "==> Installing Gonk into the ethos"
+
 clean:
 	@echo "==> cleaning working files"
 	@find . -name \emacs*.core -delete
