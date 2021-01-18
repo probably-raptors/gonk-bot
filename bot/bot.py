@@ -1,8 +1,5 @@
 from discord.ext import commands
-try:
-        from . import config
-except:
-        import config
+import config
 import discord
 import os
 
@@ -17,7 +14,7 @@ bot = commands.Bot(config.prefix, intents=intents)
 
 # Enable all cogs in /modules
 # Cog dir structure: /modules/<module_name>/cog.py
-for folder in os.listdir("modules"):
+for folder in os.listdir("bot/modules"):
 	if os.path.exists(os.path.join("modules", folder, "cog.py")):
 		bot.load_extension(f"modules.{ folder }.cog")
 

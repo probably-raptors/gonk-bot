@@ -2,8 +2,17 @@ from dotenv import load_dotenv
 import os
 
 def init():
-    global prefix, token, guild_id
+    global prefix, admin_roles, default_role, token, guild_id
+
+    # change this string to your preferred command prefix
     prefix = "./"
-    load_dotenv()
+
+    # change these strings to your preferred admin and default roles
+    admin_roles = ["Black Giant Squirrel", "Grizzled Squirrel"]
+    default_role = "Kit"
+
+    # leave these alone
     token = os.getenv("DISCORD_TOKEN")
     guild_id = os.getenv("DISCORD_GUILD")
+
+    load_dotenv()
