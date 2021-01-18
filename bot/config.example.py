@@ -19,8 +19,8 @@ def init():
     default_role = "Kit"
 
     # leave these alone
-    DISCORD_TOKEN = "Nzk5NjgzODcwNzM1ODU5NzEy.YAHJpA.nJ5GfTpRNfgdvo2tras_46hOyCk"
+    DISCORD_TOKEN = "REPLACE ME"
     token = DISCORD_TOKEN
 
-    DISCORD_GUILD = "420371160312709130"
+    DISCORD_GUILD = "REPLACE ME"
     guild_id = DISCORD_GUILD
