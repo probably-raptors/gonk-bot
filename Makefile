@@ -13,7 +13,16 @@ run:
 	@./venv/bin/python ./bot/bot.py
 
 install:
-	@echo "==> Installing Gonk into the ethos"
+	@echo "==> Installing and restarting Gonk"
+	@ssh gonkprod "cd git/gonk && git pull && pm2 restart gonk-bot"
+
+start:
+	@echo "==> That Gonk Bot is disabled!"
+	@ssh gonkprod "cd git/gonk && pm2 start ./run.sh --name gonk-bot"
+
+kill:
+	@echo "==> He's gone rogue! Kill him! KILL HIM NOW!"
+	@ssh gonkprod "cd git/gonk && pm2 delete gonk-bot"
 
 clean:
 	@echo "==> cleaning working files"
