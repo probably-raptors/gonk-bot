@@ -21,6 +21,7 @@ for folder in os.listdir("bot/modules"):
 	else:
 		print(f"Could not find a cog in { folder }")
 
+
 @bot.event
 async def on_ready():
 	print("Squirrel Sweeper Bot reporting for duty, sir!")

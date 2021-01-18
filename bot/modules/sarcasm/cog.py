@@ -21,7 +21,7 @@ class SarcasmCog(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_message(self, msg: discord.Message):
-		
+
 		# REQUIRED, otherwise the bot will also trigger this cog
 		if msg.author.bot:
 			return

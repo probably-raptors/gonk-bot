@@ -7,7 +7,7 @@ def init():
     # change this string to your preferred command prefix
     prefix = "./"
 
-    # change these strings to your preferred admin and default roles
+    # change these strings to your prefered admin and default roles
     admin_roles = ["Black Giant Squirrel", "Grizzled Squirrel"]
     default_role = "Kit"
 
