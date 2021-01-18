@@ -17,14 +17,15 @@ bot = commands.Bot(config.prefix, intents=intents)
 # Cog dir structure: /modules/<module_name>/cog.py
 for folder in os.listdir("bot/modules"):
 	if os.path.exists(os.path.join("bot/modules", folder, "cog.py")):
-		bot.load_extension(f"modules.{ folder }.cog")
-	else:
-		print(f"Could not find a cog in { folder }")
+		try:
+			bot.load_extension(f"modules.{ folder }.cog")
+		except:
+			print(f"Could not find a cog in { folder }")
 
 
 @bot.event
 async def on_ready():
-	print("Squirrel Sweeper Bot reporting for duty, sir!")
+	print("GONK")
 	print(f"I am currently logged in as { bot.user }")
 
 
