@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 import random
-from . import config
+import config
 import os
 
 config.init()
@@ -25,7 +25,7 @@ for folder in os.listdir("bot/modules"):
 
 @bot.event
 async def on_ready():
-	print("GONK")
+	print("##### GONK #####")
 	print(f"I am currently logged in as { bot.user }")
 
 
