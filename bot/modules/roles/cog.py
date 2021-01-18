@@ -18,10 +18,19 @@ class RolesCog(commands.Cog):
 	@has_permissions(manage_roles=True)
 	async def assign_role(self, ctx: commands.Context):
 		"""A command to manually assign roles to users"""
-		tokens = ctx.message.content.split().pop()
-		member = tokens[0]
-		roles = tokens[1:]
-		await member.add_roles(roles)
+
+		members = ctx.message.mentions
+		roles = ctx.message.content.split()
+		roles = roles[1:-2]
+		for member in members:
+			for r in roles:
+				try:
+					role = discord.utils.get(member.server.roles, name=r)
+				except:
+					await ctx.send("That role does not exist")
+					continue
+				await member.add_roles(role)
+				print(f"Added role: { r } to Member: { member }")
 
 	async def assign_role_err(self, ctx, error):
 		if isinstance(error, MissingPermissions):
