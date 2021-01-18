@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 import os
 
 def init():
@@ -12,7 +11,8 @@ def init():
     default_role = "Kit"
 
     # leave these alone
-    token = os.getenv("DISCORD_TOKEN")
-    guild_id = os.getenv("DISCORD_GUILD")
+    DISCORD_TOKEN = "Nzk5NjgzODcwNzM1ODU5NzEy.YAHJpA.nJ5GfTpRNfgdvo2tras_46hOyCk"
+    token = os.getenv(DISCORD_TOKEN)
 
-    load_dotenv()
+    DISCORD_GUILD = 420371160312709130
+    guild_id = os.getenv(DISCORD_GUILD)

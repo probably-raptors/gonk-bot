@@ -20,7 +20,7 @@ class RolesCog(commands.Cog):
 	@has_permissions(manage_roles=True)
 	async def add_role(self, ctx: commands.Context):
 		"""A command to manually assign roles to members"""
-		"""  ./add [Members] [Roles] """
+		"""./add [Members] [Roles]"""
 
 		tokens = await get_tokens(ctx.message.content)
 
@@ -37,7 +37,7 @@ class RolesCog(commands.Cog):
 	@has_permissions(manage_roles=True)
 	async def remove_role(self, ctx: commands.Context):
 		"""A command to manually remove roles from members"""
-		"""  ./remove [Members] [Roles] """
+		"""./remove [Members] [Roles]"""
 
 		tokens = get_tokens(ctx.message.content)
 

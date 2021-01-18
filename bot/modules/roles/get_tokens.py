@@ -7,4 +7,4 @@ async def get_tokens(self, msg: str):
 	roles.split()[:-2]
 
 	tokens = {"members": members, "roles": roles}
-	return tokens 
+	return tokens
