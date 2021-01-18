@@ -9,7 +9,7 @@ class SarcasmCog(commands.Cog):
 
 	def sarcastify(self, msg: discord.Message):
 		new_msg = ""
-		cap = True
+		cap = False
 		for c in msg:
 			if cap:
 				new_msg += c.upper()
