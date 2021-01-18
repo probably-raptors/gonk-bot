@@ -20,7 +20,7 @@ class RolesCog(commands.Cog):
 	@has_permissions(manage_roles=True)
 	async def add_role(self, ctx: commands.Context):
 		"""A command to manually assign roles to members"""
-		"""./add [Members] [Roles]"""
+		"""./add [Member1, Member2, ...] [Roles1, Role2, ...]"""
 
 		tokens = await get_tokens(ctx.message.content)
 
