@@ -1,8 +1,4 @@
-from discord.ext import commands
-import discord
-
-
-def get_tokens(self, ctx: commands.Context, msg: str):
+async def get_tokens(self, msg: str):
 
 	members = msg.partition("] [")[0].strip()
 	members.split()[3:]
@@ -11,4 +7,4 @@ def get_tokens(self, ctx: commands.Context, msg: str):
 	roles.split()[:-2]
 
 	tokens = {"members": members, "roles": roles}
-	return tokens
+	return tokens 

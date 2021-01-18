@@ -2,7 +2,7 @@ from discord.ext.commands import has_permissions, MissingPermissions
 from bot.modules.roles.get_tokens import get_tokens
 from discord.ext import commands
 from discord.utils import get
-import config
+from . import config
 import discord
 
 
@@ -22,7 +22,7 @@ class RolesCog(commands.Cog):
 		"""A command to manually assign roles to members"""
 		"""  ./add [Members] [Roles] """
 
-		tokens = get_tokens(ctx.message.content)
+		tokens = await get_tokens(ctx.message.content)
 
 		for member in tokens["members"]:
 			m = discord.utils.find(lambda m: m.name == member, ctx.guild.members)
