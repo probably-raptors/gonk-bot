@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord.ext.commands import has_permissions, MissingPermissions
 import config
 import discord
 
@@ -14,17 +15,17 @@ class RolesCog(commands.Cog):
 		await member.add_roles(config.default_role)
 
 	@commands.command(name="assign")
+	@has_permissions(manage_roles=True)
 	async def assign_role(self, ctx: commands.Context):
 		"""A command to manually assign roles to users"""
-		if ctx.author not in config.admin_roles:
-			await ctx.send("Only admins may use this command")
-		else:
-			tokens = ctx.message.content.split().pop()
-			member = tokens[0]
-			roles = tokens[1:]
+		tokens = ctx.message.content.split().pop()
+		member = tokens[0]
+		roles = tokens[1:]
+		await member.add_roles(roles)
 
-			for role in roles:
-				await member.add_roles(role)
+	async def assign_role_err(self, ctx, error):
+		if isinstance(error, MissingPermissions):
+			await ctx.send("You do not have permission to use this command")
 
 
 def setup(bot: commands.Bot):
