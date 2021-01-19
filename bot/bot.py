@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 import random
-from config import CONFIG
+from bot.config import CONFIG
 import os
 
 # Enable privledged intents for bot
