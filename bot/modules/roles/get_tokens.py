@@ -1,4 +1,4 @@
-async def get_tokens(self, msg: str):
+async def get_tokens(msg: str):
         # .add [Member1, Member2, ...] [Roles1, Role2, ...]
 
         members = ''
@@ -32,16 +32,16 @@ async def get_tokens(self, msg: str):
                         else:
                                 break
 
-        
-        
+
+
 	# members = msg.partition("] [")[0].strip()
-	# members.split()[3:]
+        # members.split()[3:]
 
 	# roles = msg.partition("] [")[2]
-	# roles.split()[:-2]
+        # roles.split()[:-2]
 
-	tokens = {
+        tokens = {
                 "members": [x.strip() for x in members.split(',')],
-                "roles":   [x.strip() for x in roles.split(',')  ], 
+                "roles":   [x.strip() for x in roles.split(',')  ],
         }
-	return tokens
+        return tokens
