@@ -1,17 +1,15 @@
 from discord.ext import commands
 import discord
 import random
-import config
+from bot.config import CONFIG
 import os
-
-config.init()
 
 # Enable privledged intents for bot
 intents = discord.Intents.default()
 intents.guilds = True
 intents.members = True
 
-bot = commands.Bot(config.prefix, intents=intents)
+bot = commands.Bot(CONFIG['PREFIX'], intents=intents)
 
 # Enable all cogs in /modules
 # Cog dir structure: /modules/<module_name>/cog.py
@@ -30,4 +28,4 @@ async def on_ready():
 
 
 # Run the bot
-bot.run(config.token)
+bot.run(CONFIG['DISCORD_TOKEN'])
