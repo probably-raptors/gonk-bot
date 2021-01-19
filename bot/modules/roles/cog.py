@@ -1,8 +1,7 @@
 from discord.ext.commands import has_permissions, MissingPermissions
-from bot.modules.roles.get_tokens import get_tokens
+from .get_tokens import get_tokens
 from discord.ext import commands
 from discord.utils import get
-from bot.config import CONFIG
 import discord
 
 
@@ -14,7 +13,7 @@ class RolesCog(commands.Cog):
 	async def on_member_join(self, member: discord.Member, ctx: commands.Context):
 		"""Assigns the default role to new users"""
 		print(f"{ member.name } has entered the nest!")
-		await member.add_roles(ctx.guild.roles, name=CONFIG['DEFAULT_ROLE'])
+		await member.add_roles(ctx.guild.roles, name='Kit')
 
 	@commands.command(name="add")
 	@has_permissions(manage_roles=True)
@@ -31,7 +30,7 @@ class RolesCog(commands.Cog):
 					r = discord.utils.find(lambda r: r.name == role, ctx.guild.roles)
 					if r is not None:
 						await m.add_roles(r)
-		# TODO: Raise exceptions for both ifs
+		                                # TODO: Raise exceptions for both ifs
 
 	@commands.command(name="remove")
 	@has_permissions(manage_roles=True)
@@ -48,7 +47,7 @@ class RolesCog(commands.Cog):
 					r = discord.utils.find(lambda r: r.name == role, ctx.guild.roles)
 					if r is not None:
 						await m.remove_roles(r)
-		# TODO: Raise exceptions for both ifs
+		                                # TODO: Raise exceptions for both ifs
 
 	async def role_err(self, ctx, error):
 		if isinstance(error, MissingPermissions):
