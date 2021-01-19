@@ -9,19 +9,19 @@ dev:
 	@./venv/bin/pip install -r requirements.txt
 
 run:
-	@echo "==> Starting Squirrel Bot"
+	@echo "==> Starting Gonk Bot"
 	@./venv/bin/python ./bot/bot.py
 
 install:
-	@echo "==> Installing and restarting Gonk"
+	@echo "==> Installing and restarting Gonk Bot"
 	@ssh gonkprod "cd git/gonk && git pull && pm2 restart gonk-bot"
 
 start:
-	@echo "==> That Gonk Bot is disabled!"
+	@echo "==> All stations, black alert"
 	@ssh gonkprod "cd git/gonk && pm2 start ./run.sh --name gonk-bot"
 
 kill:
-	@echo "==> He's gone rogue! Kill him! KILL HIM NOW!"
+	@echo "==> Kill him now"
 	@ssh gonkprod "cd git/gonk && pm2 delete gonk-bot"
 
 clean:
