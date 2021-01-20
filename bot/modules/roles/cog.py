@@ -1,7 +1,6 @@
-from discord.ext.commands import has_permissions, MissingPermissions
-from .get_tokens import get_tokens
+from .functions import get_tokens, update_roles
+from discord.ext.commands import has_permissions
 from discord.ext import commands
-from discord.utils import get
 import discord
 
 
@@ -11,47 +10,27 @@ class RolesCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, ctx: commands.Context, member: discord.Member):
-        """Assigns the default role to new users"""
+        """An event listener to assign the default role to new users"""
         print(f"{ member.name } has entered the nest!")
         await member.add_roles(ctx.guild.roles, name="Kit")
 
     @commands.command(name="add")
     @has_permissions(manage_roles=True)
-    async def add_role(self, ctx: commands.Context):
+    async def add_roles(self, ctx: commands.Context):
         """A command to manually assign roles to members"""
-        """./add [Member1, Member2, ...] [Roles1, Role2, ...]"""
+        """.add [Member1, Member2, ...] [Role1, Role2, ...]"""
 
         tokens = await get_tokens(ctx.message.content)
-
-        for member in tokens["members"]:
-            m = discord.utils.find(lambda m: m.name == member, ctx.guild.members)
-            if m is not None:
-                for role in tokens["roles"]:
-                    r = discord.utils.find(lambda r: r.name == role, ctx.guild.roles)
-                    if r is not None:
-                        await m.add_roles(r)
-                        # TODO: Raise exceptions for both ifs
+        await update_roles(ctx, tokens, flag="a")
 
     @commands.command(name="remove")
     @has_permissions(manage_roles=True)
-    async def remove_role(self, ctx: commands.Context):
+    async def remove_roles(self, ctx: commands.Context):
         """A command to manually remove roles from members"""
-        """./remove [Members] [Roles]"""
+        """.remove [Member1, Member2, ...] [Role1, Role2, ...]"""
 
         tokens = get_tokens(ctx.message.content)
-
-        for member in tokens["members"]:
-            m = discord.utils.find(lambda m: m.name == member, ctx.guild.members)
-            if m is not None:
-                for role in tokens["roles"]:
-                    r = discord.utils.find(lambda r: r.name == role, ctx.guild.roles)
-                    if r is not None:
-                        await m.remove_roles(r)
-                        # TODO: Raise exceptions for both ifs
-
-    async def role_err(self, ctx, error):
-        if isinstance(error, MissingPermissions):
-            await ctx.send("You do not have permission to use this command")
+        await update_roles(ctx, tokens, flag="r")
 
 
 def setup(bot: commands.Bot):
