@@ -1,7 +1,7 @@
 import discord
 
 
-async def get_tokens(msg: str):
+def get_tokens(msg: str):
     # .add [Member1, Member2, ...] [Roles1, Role2, ...]
 
     members = ""
