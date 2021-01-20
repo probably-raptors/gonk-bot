@@ -19,7 +19,7 @@ class RolesCog(commands.Cog):
     async def add_roles(self, ctx: commands.Context):
         """A command to manually assign roles to members"""
         """.add [Member1, Member2, ...] [Role1, Role2, ...]"""
-
+        print("add_roles was called")
         tokens = get_tokens(ctx.message.content)
         await update_roles(ctx, tokens, flag="a")
 
