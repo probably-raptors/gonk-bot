@@ -3,7 +3,7 @@
 
 CONFIG = {
     # change this string to your preferred command prefix
-    'prefix': ".",
+    'PREFIX': ".",
 
     # change these strings to your prefered admin and default roles
     'ADMIN_ROLES' : ["Black Giant Squirrel", "Grizzled Squirrel"],
