@@ -13,6 +13,7 @@ extensions = [
     "modules.ping.cog",
     "modules.sarcasm.cog",
     "modules.roles.cog",
+    "modules.watch.cog",
 ]
 
 for extension in extensions:
