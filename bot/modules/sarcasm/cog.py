@@ -4,19 +4,17 @@ import random
 
 
 class SarcasmCog(commands.Cog):
-	def __init__(self, bot: commands.Bot):
-		self.bot = bot
+        def __init__(self, bot: commands.Bot):
+                self.bot = bot
 
-	def sarcastify(self, msg: str):
+        def sarcastify(self, msg: str):
 		new_msg = ""
 		cap = False
-		for c in msg:
-			if cap:
-				new_msg += c.upper()
+		for i, c in enumerate(msg):
+                        if i % 2:
+                                new_msg += c.upper()
 			else:
 				new_msg += c.lower()
-			if c != " ":
-				cap = not cap
 		return new_msg
 
 	@commands.Cog.listener()
