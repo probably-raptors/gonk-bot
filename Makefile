@@ -1,4 +1,4 @@
-.PHONY: all dev test clean relclean
+.PHONY: all dev test clean relclean db devdb
 
 all:
 	@echo read Makefile for useful targets
@@ -15,6 +15,14 @@ run:
 install:
 	@echo "==> Installing and restarting Gonk Bot"
 	@ssh gonkprod "cd git/gonk && git pull && pm2 restart gonk-bot"
+
+db:
+	@echo"==> Updating live DB"
+	@ssh gonkprod "cd git/gonk && git pull && mysql -uroot < db/schema.sql"
+
+devdb:
+	@echo"==> Updating local DB"
+	@ssh gonkprod "mysql -uroot < db/schema.sql"
 
 start:
 	@echo "==> All stations, black alert"
