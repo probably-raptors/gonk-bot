@@ -3,10 +3,10 @@ CREATE DATABASE IF NOT EXISTS gonk_bot;
 use gonk_bot;
 
 CREATE TABLE IF NOT EXISTS watch_cog(
-       id int primary key auto_increment,
-       user   varchar(20),
-       coin   varchar(20),
-       status int default 0,
-       low    int default 0,
-       high   int default 0
+       id INT PRIMARY KEY AUTO_INCREMENT,
+       symbol VARCHAR(20),
+       user   BIGINT(8),
+       status INT DEFAULT 0,
+       lower  DOUBLE DEFAULT NULL,
+       upper  DOUBLE DEFAULT NULL
 );

@@ -25,4 +25,7 @@ CONFIG = {
     'DBUSER': 'root',
     'DBPASS': '',
     'DBHOST': '',
+
+    # API Keys
+    'CMCKEY': '723ba2c2-774e-42e9-826a-20f4993669a1',
 }
