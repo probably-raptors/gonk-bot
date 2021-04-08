@@ -17,11 +17,11 @@ install:
 	@ssh gonkprod "cd git/gonk && git pull && pm2 restart gonk-bot && pm2 save --force"
 
 db:
-	@echo"==> Updating live DB"
+	@echo "==> Updating live DB"
 	@ssh gonkprod "cd git/gonk && git pull && mysql -uroot < db/schema.sql"
 
 devdb:
-	@echo"==> Updating local DB"
+	@echo "==> Updating local DB"
 	@ssh gonkprod "mysql -uroot < db/schema.sql"
 
 start:
