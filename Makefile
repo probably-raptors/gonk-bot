@@ -22,7 +22,7 @@ db:
 
 devdb:
 	@echo "==> Updating local DB"
-	@ssh gonkprod "mysql -uroot < db/schema.sql"
+	@mysql -uroot < ./db/schema.sql
 
 start:
 	@echo "==> All stations, black alert"
