@@ -24,6 +24,10 @@ devdb:
 	@echo "==> Updating local DB"
 	@mysql -uroot < ./db/schema.sql
 
+startdb:
+	@echo "==> Starting local DB - only useful if you're on WSL like a dumbass"
+	@sudo sudo /etc/init.d/mysql start
+
 start:
 	@echo "==> All stations, black alert"
 	@ssh gonkprod "cd git/gonk && pm2 start ./run.sh --name gonk-bot && pm2 save --force"
