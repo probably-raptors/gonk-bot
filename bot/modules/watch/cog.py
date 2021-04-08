@@ -77,28 +77,32 @@ class WatchCog(commands.Cog):
         async def watch(self, ctx):
                 # Only allow watch command in "crypto-prices" channel
                 if ctx.channel.id != self.channel_id:
-                        await ctx.channel.send(tmp.chnl_err)
+                        await ctx.channel.send("Please send watch commands in <#829037611841749063>")
                         return
 
-                m = re.match(tmp.cmd_regex, ctx.message.content)
+                m = re.match(rf'{ CONFIG["PREFIX"] }watch ([a-zA-Z0-9]+) (?:\$)?(\d+(?:\.\d+)?)(?: (?:\$)?(\d+(?:\.\d+)?))?$', ctx.message.content)
                 if m is None:
-                        await ctx.channel.send(tmp.cfmt)
+                        await ctx.channel.send(
+                        f"Could not parse required information, please follow the format:\n`{ CONFIG['PREFIX'] }watch SYMBOL [$]0[.00][ [$]0[.00]]`"
+                        )
                         return
 
                 symbol, price_1, price_2 = m.groups()
                 ubnd = lbnd = None
 
                 symbol = symbol.upper()
-                data = self.fetch_data([symbol])
-                stat = data.get('status', {})
-                error = stat.get('error_code',  999)
+                data   = self.fetch_data([symbol])
+                stat   = data.get('status', {})
+                error  = stat.get('error_code',  999)
                 if error != 0:
-                        await ctx.channel.send(tmp.sym_err(symbol))
+                        await ctx.channel.send(
+                        f"Could not locate Symbol { symbol }, this error has been logged, please try again.\n<@280231128852332544> I'm having issues..."
+                        )
                         return
 
                 cur_price = data.get('data', {}).get(symbol, {}).get('quote', {}).get('USD', {}).get('price', None)
                 if cur_price is None:
-                        await ctx.channel.send(tmp.prc_err)
+                        await ctx.channel.send(f"Could not locate price, this error has been logged.\n<@280231128852332544> I'm having issues...")
                         return
 
                 if price_2 is not None:
@@ -111,7 +115,7 @@ class WatchCog(commands.Cog):
                         else:               ubnd = bnd
 
                 if ubnd == 0 or lbnd == 0:
-                        await ctx.channel.send(tmp.z_err)
+                        await ctx.channel.send("You are not allowed to enter 0 as a price marker, please try again.")
                         return
 
                 dbh = db.get_dbh()

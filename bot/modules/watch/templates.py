@@ -1,25 +1,5 @@
 from config import CONFIG
 
-# PARSING ERROR
-prs_err = f"Could not parse required information, please follow the format:\n`{ CONFIG['PREFIX'] }watch SYMBOL [$]0[.00][ [$]0[.00]]`"
-
-# CHANNEL ERROR
-chnl_err = "Please send watch commands in <#829037611841749063>"
-
-# SYMBOL ERROR
-def sym_err(symbol):
-    return f"Could not locate Symbol { symbol }, this error has been logged, please try again.\n<@280231128852332544> I'm having issues..."
-
-# COMMAND REGEX
-cmd_regex = rf'{ CONFIG["PREFIX"] }watch ([a-zA-Z0-9]+) (?:\$)?(\d+(?:\.\d+)?)(?: (?:\$)?(\d+(?:\.\d+)?))?$'
-
-# PRICE ERROR - internal issue
-prc_err = f"Could not locate price, this error has been logged.\n<@280231128852332544> I'm having issues..."
-
-# ZERO ENTERED IN COMMAND ERROR
-z_err = f"You are not allowed to enter 0 as a price marker, please try again."
-
-
 # NOTIFICATION TABLE
 
 def gen_notification_table(data):
