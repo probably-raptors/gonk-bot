@@ -14,7 +14,7 @@ run:
 
 install:
 	@echo "==> Installing and restarting Gonk Bot"
-	@ssh gonkprod "cd git/gonk && git pull && pm2 restart gonk-bot"
+	@ssh gonkprod "cd git/gonk && git pull && pm2 restart gonk-bot && pm2 save --force"
 
 db:
 	@echo"==> Updating live DB"
@@ -26,11 +26,15 @@ devdb:
 
 start:
 	@echo "==> All stations, black alert"
-	@ssh gonkprod "cd git/gonk && pm2 start ./run.sh --name gonk-bot"
+	@ssh gonkprod "cd git/gonk && pm2 start ./run.sh --name gonk-bot && pm2 save --force"
 
 kill:
 	@echo "==> Kill him now"
-	@ssh gonkprod "cd git/gonk && pm2 delete gonk-bot"
+	@ssh gonkprod "cd git/gonk && pm2 delete gonk-bot && pm2 save --force"
+
+status:
+	@echo "==> What's goin on over der?"
+	@ssh gonkprod "pm2 ls && pm2 save --force"
 
 clean:
 	@echo "==> cleaning working files"
