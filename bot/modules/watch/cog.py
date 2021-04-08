@@ -3,6 +3,7 @@ import os, discord, db, re, utils
 import mysql.connector as mysql
 from . import templates as tmp
 from config import CONFIG
+from log import logger
 
 # CMC API CALLS
 from requests import Request, Session
@@ -17,37 +18,41 @@ class WatchCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         self.check_prices.start()
-
+        
     def cog_unload(self):
         self.check_prices.cancel()
 
     @tasks.loop(minutes=15.0)
     async def check_prices(self):
-    # @commands.command(name="watchtest", pass_context=True)
-    # async def check_prices(self, ctx):
+        channel = self.bot.get_channel(self.channel_id)
+
         dbh = db.get_dbh()
         cur = dbh.cursor(buffered=True)
-
+        
         sql = 'SELECT * FROM watch_cog WHERE status=0'
         ret = db.select(cur, sql, null_as_blank=False)
 
         symbols = set() # Get unique set of SYMBOLS to poll from CMC
         [symbols.add(r['symbol']) for r in ret]
-        data = self.fetch_data(symbols)
+
+        if not len(symbols):
+            return
+        
+        prices = self.fetch_data(symbols)
+
+        if prices['stat'] != 0:
+            await channel.send(prices['msg'])
+            return
 
         user_map = {}
-        prices   = {}
         for r in ret:
             user   = r['user']  # readability
             symbol = r['symbol']
 
             if symbol not in prices.keys(): # more readable price lookup
-                prices[symbol] = data.get('data', {}).get(symbol, {}).get('quote', {}).get('USD', {}).get('price', 0.0)
-                # check if None, throw err, waiting for logger and price extraction abstraction
-
                 bound = None
-                if   r['upper'] and prices[symbol] >= r['upper']: bound = r['upper']
-                elif r['lower'] and prices[symbol] <= r['lower']: bound = r['lower']
+                if   r['upper'] and prices['data'][symbol] >= r['upper']: bound = r['upper']
+                elif r['lower'] and prices['data'][symbol] <= r['lower']: bound = r['lower']
 
                 # Nothing to do, go to next
                 if bound is None: continue
@@ -57,13 +62,12 @@ class WatchCog(commands.Cog):
 
                 user_map[user][symbol].append({
                     'BOUND': f'${ utils.atos(bound) }',
-                    'PRICE': f'${ utils.atos(prices[symbol]) }',
+                    'PRICE': f'${ utils.atos(prices["data"][symbol]) }',
                 })
 
                 sql = 'UPDATE watch_cog SET status=1 WHERE id=%s'
                 cur.execute(sql, (r['id'],))
 
-        channel = self.bot.get_channel(self.channel_id)
         for user in user_map.keys():
             table = tmp.gen_notification_table(user_map[user])
             await channel.send(f"<@{ user }> I have an update for you!\n```{ table }\n```")
@@ -91,20 +95,12 @@ class WatchCog(commands.Cog):
         ubnd = lbnd = None
 
         symbol = symbol.upper()
-        data   = self.fetch_data([symbol])
-        stat   = data.get('status', {})
-        error  = stat.get('error_code',  999)
-        if error != 0:
-            await ctx.channel.send(
-            f"Could not locate Symbol { symbol }, this error has been logged, please try again.\n<@280231128852332544> I'm having issues..."
-            )
+        prices = self.fetch_data([symbol])
+        if prices['stat'] != 0:
+            await ctx.channel.send(prices['msg'])
             return
-
-        cur_price = data.get('data', {}).get(symbol, {}).get('quote', {}).get('USD', {}).get('price', None)
-        if cur_price is None:
-            await ctx.channel.send(f"Could not locate price, this error has been logged.\n<@280231128852332544> I'm having issues...")
-            return
-
+        
+        cur_price = prices['data'][symbol]
         if price_2 is not None:
             ubnd = max(utils.atof(price_1), utils.atof(price_2))
             lbnd = min(utils.atof(price_1), utils.atof(price_2))
@@ -168,11 +164,38 @@ class WatchCog(commands.Cog):
         session.headers.update(headers)
 
         try:
+            ret = {
+                'data': {},
+                'stat': 0,
+                'msg' : '',
+            }
             response = session.get(url, params=parameters)
-            return json.loads(response.text)
+
+            data  = json.loads(response.text)
+            stat  = data.get('status', {})
+            error = stat.get('error_code',  999)
+
+            if error != 0:
+                ret['stat'] = error
+                ret['msg'] = "I've encountered an HTTP error, please try again.\n<@280231128852332544> I'm having issues..."
+                logger.error(f"Could not fetch from CMC: { stat }")
+                return ret
+
+            for symbol, info in json.loads(response.text).get('data', {}).items():
+                price = info.get('quote', {}).get('USD', {}).get('price', None)
+                if price is None:
+                    logger.error(f"Parsed '{ price }' for price on symbol '{ symbol }'")
+                    ret['stat'] = -1
+                    ret['msg'] = "Failed to parse price information, please try again.\n<@280231128852332544> I'm having issues..."
+                    return ret
+
+                ret['data'][symbol] = price
+            return ret
+        
         except (ConnectionError, Timeout, TooManyRedirects) as e:
-            print(e)
-            return {}
+            logger.error(e)
+            ret['stat'] = -1
+            return ret
 
 def setup(bot: commands.Bot):
     bot.add_cog(WatchCog(bot))
