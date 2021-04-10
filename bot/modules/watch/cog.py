@@ -22,6 +22,31 @@ class WatchCog(commands.Cog):
     def cog_unload(self):
         self.check_prices.cancel()
 
+    # @commands.command(name="watchtest", pass_context=True)
+    # async def watchtest(self, ctx):
+
+    #     headers = ['COL 1', 'COL 2', 'COL 3', 'COL 4']
+    #     data_1  = [
+    #         ['R1-C1', 'R1-C2',        'R1-C3', 'R1-C4'],
+    #         ['R2-C1', 'R2-C2',        'R2-C3', 'R2-C4'],
+    #         ['R3-C1', 'R3-C2 longer', 'R3-C3', 'R3-C4'],
+    #         ['R4-C1', 'R4-C2',        'R4-C3', 'R4-C4'],
+    #         ['R5-C1', 'R5-C2',        'R5-C3', 'R5-C4'],
+    #     ]
+    #     msg_1 = tmp.gen_table(headers, data_1)
+
+    #     data_2  = [
+    #         ['R1-C1', 'R2-C1', 'R3-C1', 'R4-C1 longer', 'R5-C1'],
+    #         ['R1-C2', 'R2-C2', 'R3-C2', 'R4-C2',        'R5-C2'],
+    #         ['R1-C3', 'R2-C3', 'R3-C3', 'R4-C3',        'R5-C3'],
+    #         ['R1-C4', 'R2-C4', 'R3-C4', 'R4-C4',        'R5-C4'],
+    #     ]
+    #     msg_2 = tmp.gen_table(headers, data_2, ver=True)
+
+    #     await ctx.channel.send(msg_1)
+    #     await ctx.channel.send(msg_2)
+    #     return
+
     @tasks.loop(minutes=15.0)
     async def check_prices(self):
         channel = self.bot.get_channel(self.channel_id)
@@ -133,17 +158,28 @@ class WatchCog(commands.Cog):
         dbh = db.get_dbh()
         cur = dbh.cursor(buffered=True)
 
-        sql = 'SELECT * FROM watch_cog WHERE user=%s AND status=0'
-        ret = db.select(cur, sql, (ctx.author.id,))
-        msg = ''
-        for i, r in enumerate(ret):
-            if i > 0: msg += '\n'
-            msg += f'ID: { r["id"] } | Symbol: { r["symbol"] }'
-            if r['lower'] != 0: msg += f' | Lower Bound: { r["lower"] }'
-            if r['upper'] != 0: msg += f' | Upper Bound: { r["upper"] }'
+        sql  = 'SELECT * FROM watch_cog WHERE user=%s AND status=0'
+        ret  = db.select(cur, sql, (ctx.author.id,))
 
-        if len(msg): await ctx.channel.send(msg)
-        else:        await ctx.channel.send("You are not currently tracking any coins")
+        symbols = set() # Get unique set of SYMBOLS to poll from CMC
+        [symbols.add(r['symbol']) for r in ret]
+
+        if not len(symbols):
+            await ctx.channel.send("You are not currently tracking any coins")
+            return
+        
+        prices = self.fetch_data(symbols)
+        if prices['stat'] != 0:
+            await channel.send(prices['msg'])
+            return
+
+        rows = []
+        for i, r in enumerate(ret):
+            price = prices['data'][r['symbol']]
+            rows.append([utils.atos(x) for x in [r['id'], r['symbol'], r['lower'], r['upper'], price]])
+
+        table = tmp.gen_table(['ID', 'Symbol', 'Lower Bound', 'Upper Bound', 'Current Price'], rows)
+        await ctx.channel.send(table)
 
         cur.close()
         dbh.close()
