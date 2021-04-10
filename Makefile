@@ -26,7 +26,7 @@ devdb:
 
 startdb:
 	@echo "==> Starting local DB - only useful if you're on WSL like a dumbass"
-	@sudo sudo /etc/init.d/mysql start
+	@sudo /etc/init.d/mysql start
 
 start:
 	@echo "==> All stations, black alert"
