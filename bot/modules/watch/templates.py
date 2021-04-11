@@ -48,6 +48,7 @@ def gen_table(headers, data, ver=False, row_sep='|', col_sep='-', padding=4):
         for i, col in enumerate(row):
             table += row_sep
             table += col.center(col_widths[i] + padding)
+            if len(table) >= 1800: break # hotfix...this is a terrible fix
         table += f'{ row_sep }\n'
         table += col_break
     table += '```'
