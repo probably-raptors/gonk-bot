@@ -47,7 +47,7 @@ class WatchCog(commands.Cog):
     #     await ctx.channel.send(msg_2)
     #     return
 
-    @tasks.loop(minutes=15.0)
+    @tasks.loop(minutes=5.0)
     async def check_prices(self):
         channel = self.bot.get_channel(self.channel_id)
 
@@ -120,16 +120,17 @@ class WatchCog(commands.Cog):
         ubnd = lbnd = None
 
         symbol = symbol.upper()
-        prices = self.fetch_data([symbol])
-        if prices['stat'] != 0:
-            await ctx.channel.send(prices['msg'])
-            return
-        
-        cur_price = prices['data'][symbol]
         if price_2 is not None:
             ubnd = max(utils.atof(price_1), utils.atof(price_2))
             lbnd = min(utils.atof(price_1), utils.atof(price_2))
         else:
+            # Only fetch prices if needed (gotta save our credits)
+            prices = self.fetch_data([symbol])
+            if prices['stat'] != 0:
+                await ctx.channel.send(prices['msg'])
+                return
+            cur_price = prices['data'][symbol]
+            
             # preserves None value for unused bound
             bnd  = utils.atof(price_1)
             if cur_price > bnd: lbnd = bnd
@@ -181,6 +182,44 @@ class WatchCog(commands.Cog):
         table = tmp.gen_table(['ID', 'Symbol', 'Lower Bound', 'Upper Bound', 'Current Price'], rows)
         await ctx.channel.send(table)
 
+        cur.close()
+        dbh.close()
+        return
+
+    @commands.command(name="watchdel", pass_context=True)
+    async def watchdel(self, ctx):
+
+        m = re.match(rf'{ CONFIG["PREFIX"] }watchdel (\d+)$', ctx.message.content)
+        if m is None:
+            await ctx.channel.send(
+            f"Could not parse required information, please follow the format:\n`{ CONFIG['PREFIX'] }watchdel ID`"
+            )
+            return
+
+        row_id = m.groups()[0]
+
+        dbh = db.get_dbh()
+        cur = dbh.cursor(buffered=True)
+
+        sql  = 'SELECT * FROM watch_cog WHERE user=%s AND status=0 AND id=%s'
+        row  = db.select_one(cur, sql, (ctx.author.id, row_id))
+
+        if row is None:
+            await ctx.channel.send(
+            f"Could not locate ID { row_id } for USER <@{ ctx.author.id }>, please try again with an ID from `{ CONFIG['PREFIX'] }watchlist`."
+            )
+            cur.close()
+            dbh.close()
+            return
+
+        sql = 'UPDATE watch_cog SET status=1 WHERE user=%s AND status=0 AND id=%s'
+        cur.execute(sql, (ctx.author.id,row_id))
+        dbh.commit()
+
+        await ctx.channel.send(
+        f"Orders recieved. No longer watching ID { row_id }: { row['symbol'] }"
+        )
+        
         cur.close()
         dbh.close()
         return
