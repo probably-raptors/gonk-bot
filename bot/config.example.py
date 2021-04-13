@@ -18,7 +18,6 @@ CONFIG = {
 
     # Get tokens from discord dev portal/server, add them to
     'DISCORD_TOKEN' : "REPLACE ME",
-    'DISCORD_GUILD' : "REPLACE ME"
 
     # DB config options, unless your dev environment is different, leave these alone
     'DBNAME': 'gonk_bot',
