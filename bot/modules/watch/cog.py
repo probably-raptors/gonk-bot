@@ -22,31 +22,6 @@ class WatchCog(commands.Cog):
     def cog_unload(self):
         self.check_prices.cancel()
 
-    # @commands.command(name="watchtest", pass_context=True)
-    # async def watchtest(self, ctx):
-
-    #     headers = ['COL 1', 'COL 2', 'COL 3', 'COL 4']
-    #     data_1  = [
-    #         ['R1-C1', 'R1-C2',        'R1-C3', 'R1-C4'],
-    #         ['R2-C1', 'R2-C2',        'R2-C3', 'R2-C4'],
-    #         ['R3-C1', 'R3-C2 longer', 'R3-C3', 'R3-C4'],
-    #         ['R4-C1', 'R4-C2',        'R4-C3', 'R4-C4'],
-    #         ['R5-C1', 'R5-C2',        'R5-C3', 'R5-C4'],
-    #     ]
-    #     msg_1 = tmp.gen_table(headers, data_1)
-
-    #     data_2  = [
-    #         ['R1-C1', 'R2-C1', 'R3-C1', 'R4-C1 longer', 'R5-C1'],
-    #         ['R1-C2', 'R2-C2', 'R3-C2', 'R4-C2',        'R5-C2'],
-    #         ['R1-C3', 'R2-C3', 'R3-C3', 'R4-C3',        'R5-C3'],
-    #         ['R1-C4', 'R2-C4', 'R3-C4', 'R4-C4',        'R5-C4'],
-    #     ]
-    #     msg_2 = tmp.gen_table(headers, data_2, ver=True)
-
-    #     await ctx.channel.send(msg_1)
-    #     await ctx.channel.send(msg_2)
-    #     return
-
     @tasks.loop(minutes=5.0)
     async def check_prices(self):
         channel = self.bot.get_channel(self.channel_id)
@@ -105,7 +80,7 @@ class WatchCog(commands.Cog):
     @commands.command(name="watch", pass_context=True)
     async def watch(self, ctx):
         # Only allow watch command in "crypto-prices" channel
-        if ctx.channel.id != self.channel_id:
+        if ctx.channel.id != self.channel_id and ctx.channel.id != CONFIG['DEV_CHANNEL']:
             await ctx.channel.send("Please send watch commands in <#829037611841749063>")
             return
 
@@ -252,7 +227,7 @@ class WatchCog(commands.Cog):
 
             if error != 0:
                 ret['stat'] = error
-                ret['msg'] = "I've encountered an HTTP error, please try again.\n<@280231128852332544> I'm having issues..."
+                ret['msg'] = f"I've encountered an HTTP error, please try again.\n<@{ CONFIG['ADMIN_NOTIFY'] }> I'm having issues..."
                 logger.error(f"Could not fetch from CMC: { stat }")
                 return ret
 
