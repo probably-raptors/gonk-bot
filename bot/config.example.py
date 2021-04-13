@@ -26,5 +26,10 @@ CONFIG = {
     'DBHOST': '',
 
     # API Keys
-    'CMCKEY': '',
+    'CMCKEY': 'REPLACE ME',
+
+    # Sarcasm Cog banned channels
+    'SARCASM_BAN': [
+        # right-click channel -> copy id
+    ],
 }

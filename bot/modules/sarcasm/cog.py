@@ -1,4 +1,5 @@
 from discord.ext import commands
+from config import CONFIG
 import discord
 import random
 
@@ -29,7 +30,7 @@ class SarcasmCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
         # REQUIRED, otherwise the bot will also trigger this cog
-        if msg.author.bot or msg.channel.id in banned_channels:
+        if msg.author.bot or msg.channel.id in CONFIG['SARCASM_BAN']:
             return
 
         # change the range to (1, 1) for testing / trolling
