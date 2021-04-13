@@ -35,15 +35,15 @@ CONFIG = {
     'DBHOST': '',
 
     # API Keys
-    'CMCKEY': '', # COINMARKETCAP
-
-    # Sarcasm Cog banned channels
-    'SARCASM_BAN': [
-        # right-click channel -> copy id
-    ],
+    # COINMARKETCAP
+    'CMCKEY': '', 
 
     # Coin Watch cog channel
     # right-click channel -> copy id
     'WATCH_CHANNEL': 0,
 
+    # Sarcasm Cog banned channels
+    'SARCASM_BAN': [
+        # right-click channel -> copy id
+    ],
 }
