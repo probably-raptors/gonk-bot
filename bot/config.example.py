@@ -13,8 +13,8 @@ CONFIG = {
     'PREFIX': ".",
 
     # change these strings to your prefered admin and default roles
-    'ADMIN_ROLES' : ["Black Giant Squirrel", "Grizzled Squirrel"],
-    'DEFAULT_ROLE': "Kit",
+    'ADMIN_ROLES' : [],
+    'DEFAULT_ROLE': "",
 
     # Get tokens from discord dev portal/server, add them to
     'DISCORD_TOKEN' : "REPLACE ME",
