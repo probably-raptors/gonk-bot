@@ -3,16 +3,6 @@ from config import CONFIG
 import discord
 import random
 
-banned_channels = [
-    # right click channel -> copy-id
-    829037611841749063, # crypto-prices
-    814700413671571456, # role-request
-    819199216936419369, # tabletop
-    801040888133320746, # bot-dev
-    799685145732317234, # bot-spam
-    770324598117629972, # mc-admin
-]
-
 class SarcasmCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
