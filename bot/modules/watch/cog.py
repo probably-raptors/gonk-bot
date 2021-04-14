@@ -46,12 +46,12 @@ class WatchCog(commands.Cog):
         }
 
 
-    # @commands.Cog.listener()
-    # async def on_ready(self):
-    #     self.check_prices.start()
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.check_prices.start()
         
-    # def cog_unload(self):
-    #     self.check_prices.cancel()
+    def cog_unload(self):
+        self.check_prices.cancel()
 
     @commands.command(name="watch", pass_context=True)
     async def watchcli(self, ctx, mode=None, *args):
@@ -219,10 +219,10 @@ class WatchCog(commands.Cog):
 
     async def list_token(self, ctx, *args):
         if len(args) != 0: # HELP
-            embed = discord.Embed(title='Help', description='info does not accept any arguments')
+            embed = discord.Embed(title='Help', description='Info does not accept any arguments.')
             
             #\u200b for "no name field"
-            embed.add_field(name='Formatting', value=f"`{ CONFIG['PREFIX'] }watch list", inline=False)
+            embed.add_field(name='Formatting', value=f"`{ CONFIG['PREFIX'] }watch list`", inline=False)
             embed.add_field(name='How it works', inline=False, value=(
                 "The list command does not accept any arguments. When called, it will simply return "
                 "any coins you are currently tracking, what the bounds you set were, and the current "
