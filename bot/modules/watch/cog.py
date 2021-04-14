@@ -293,7 +293,7 @@ class WatchCog(commands.Cog):
 # OLD APPROACH, SLOWLY CONVERTING ALL OF BELOW TO ABOVE CLI BASED SYSTEM
 
     
-    @tasks.loop(minutes=5.0)
+    @tasks.loop(minutes=10.0)
     async def check_prices(self):
         channel = self.bot.get_channel(self.channel_id)
 
