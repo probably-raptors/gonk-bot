@@ -412,7 +412,13 @@ class WatchCog(commands.Cog):
             return f'${price:.5f}'
         if price > 0.00005:
             return f'${price:.6f}'
-        return f'${price:.7f}'
+        if price > 0.000005:
+            return f'${price:.7f}'
+        if price > 0.0000005:
+            return f'${price:.8f}'
+        if price > 0.00000005:
+            return f'${price:.9f}'
+        return f'${price:.12f}'
     
 def setup(bot: commands.Bot):
     bot.add_cog(WatchCog(bot))
