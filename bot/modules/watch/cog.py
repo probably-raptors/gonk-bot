@@ -1,7 +1,6 @@
 from discord.ext import commands, tasks
 import os, discord, db, re, utils, argparse
 import mysql.connector as mysql
-from . import templates as tmp
 from config import CONFIG
 from log import logger
 
@@ -304,9 +303,9 @@ class WatchCog(commands.Cog):
             return
         
         prices = self.fetch_data(symbols)
-
         if prices['stat'] != 0:
-            await channel.send(prices['msg'])
+            embed = discord.Embed(title=f"Error: { prices['stat'] }", description=f"While checking targets, I ran into an issue.\n\n{ prices['msg'] }", color=0xa33b24)
+            await channel.send(embed=embed)
             return
 
         user_map = {}
@@ -314,10 +313,14 @@ class WatchCog(commands.Cog):
             user   = r['user']  # readability
             symbol = r['symbol']
 
-            if symbol not in prices.keys(): # more readable price lookup
-                bound = None
-                if   r['upper'] and prices['data'][symbol] >= r['upper']: bound = r['upper']
-                elif r['lower'] and prices['data'][symbol] <= r['lower']: bound = r['lower']
+            if symbol in prices['data'].keys(): # more readable price lookup
+                bound = None; above = False
+
+                if   r['upper'] and prices['data'][symbol] >= r['upper']:
+                    bound = r['upper']
+                    above = True
+                elif r['lower'] and prices['data'][symbol] <= r['lower']:
+                    bound = r['lower']
 
                 # Nothing to do, go to next
                 if bound is None: continue
@@ -325,20 +328,25 @@ class WatchCog(commands.Cog):
                 if user   not in user_map.keys():       user_map[user]         = {}
                 if symbol not in user_map[user].keys(): user_map[user][symbol] = []
 
-                user_map[user][symbol].append({
-                    'BOUND': f'{ self.format_price(utils.atos(bound)) }',
-                    'PRICE': f'{ self.format_price(prices["data"][symbol]) }',
-                })
+                user_map[user][symbol].append(f'Now **{ "over" if above else "under" }** { self.format_price(utils.atos(bound)) }')
 
                 sql = 'UPDATE watch_cog SET status=1 WHERE id=%s'
                 cur.execute(sql, (r['id'],))
 
-        for user in user_map.keys():
-            table = tmp.gen_notification_table(user_map[user])
-            await channel.send(f"<@{ user }> I have an update for you!\n```{ table }\n```")
+        for user, data in user_map.items():
+            embed = discord.Embed(
+                color       = 0x24a36a,
+                title       = 'Gonk Ticker',
+                description = f'<@{ user }> I have an update for you!',
+            )
 
-        dbh.commit()
-        cur.close()
+            for symbol, msgs in data.items():
+                for msg in msgs:
+                    embed.add_field(name=f"{ symbol }  --  { self.format_price(prices['data'][symbol]) }", value=msg, inline=False)
+
+            await channel.send(embed=embed)
+
+        dbh.commit(); cur.close()
         dbh.close()
         return
 
