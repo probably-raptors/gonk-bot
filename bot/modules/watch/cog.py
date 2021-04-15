@@ -279,7 +279,7 @@ class WatchCog(commands.Cog):
                 s += '`'
                 v.append(s)
                 
-            embed.add_field(name=f"{ symbol }  --  { self.format_price(prices['data'][symbol]) }", value='\n'.join(v), inline=False)
+            embed.add_field(name=f"\n{ symbol }  --  { self.format_price(prices['data'][symbol]) }", value='\n'.join(v), inline=False)
 
         await ctx.channel.send(embed=embed)
         cur.close(); dbh.close()
@@ -392,6 +392,8 @@ class WatchCog(commands.Cog):
 
     def format_price(self, price):
         price = utils.atof(price)
+        if price > 5:
+            return f'${price:,.2f}'
         if price > 0.05:
             return f'${price:.3f}'
         if price > 0.005:
