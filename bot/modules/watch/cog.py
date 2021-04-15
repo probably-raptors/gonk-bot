@@ -143,9 +143,9 @@ class WatchCog(commands.Cog):
         )
 
         if ubnd is not None:
-            embed.add_field(name="Upper Bound", value=ubnd)
+            embed.add_field(name="Upper Bound", value=self.format_price(ubnd))
         if lbnd is not None:
-            embed.add_field(name="Lower Bound", value=lbnd)
+            embed.add_field(name="Lower Bound", value=self.format_price(lbnd))
             
         await ctx.channel.send(embed=embed)
         
@@ -158,7 +158,7 @@ class WatchCog(commands.Cog):
 
         ids  = set(); err = []
         info = {}
-        for arg in args:
+        for arg in args: # hacky way of looking up arg[n] as ID or SYMBOL to avoid complex regex parsing
             sql  = 'SELECT * FROM watch_cog WHERE user=%s AND status=0 AND (id=%s OR symbol=%s)'
             rows = db.select(cur, sql, (ctx.author.id,arg,arg))
 
@@ -167,6 +167,8 @@ class WatchCog(commands.Cog):
                 continue
             
             for row in rows:
+                if row['id'] in ids:
+                    continue # avoid duplicates
                 ids.add(row['id'])
 
                 if row['symbol'] not in info.keys():
@@ -201,8 +203,8 @@ class WatchCog(commands.Cog):
             v = []
             for d in deleted:
                 s = f"`ID: { d['id'] }"
-                if d['upper']: s += f" | Upper Bound: { d['upper'] }"
-                if d['lower']: s += f" | Lower Bound: { d['lower'] }"
+                if d['upper']: s += f" | Upper Bound: { self.format_price(d['upper']) }"
+                if d['lower']: s += f" | Lower Bound: { self.format_price(d['lower']) }"
                 s += '`'
                 v.append(s)
                 
@@ -272,27 +274,19 @@ class WatchCog(commands.Cog):
             v = []
             for i in info:
                 s = f"`ID: { i['id'] }"
-                if i['upper']: s += f" | Upper Bound: { i['upper'] }"
-                if i['lower']: s += f" | Lower Bound: { i['lower'] }"
+                if i['upper']: s += f" | Upper Bound: { self.format_price(i['upper']) }"
+                if i['lower']: s += f" | Lower Bound: { self.format_price(i['lower']) }"
                 s += '`'
                 v.append(s)
                 
-            embed.add_field(name=f"{ symbol }  --  ${ prices['data'][symbol] }", value='\n'.join(v), inline=False)
+            embed.add_field(name=f"{ symbol }  --  { self.format_price(prices['data'][symbol]) }", value='\n'.join(v), inline=False)
 
         await ctx.channel.send(embed=embed)
         cur.close(); dbh.close()
 
     async def token_info(self, ctx, *args):
         return
-
-
-    
-
-
-##################################################################################################
-# OLD APPROACH, SLOWLY CONVERTING ALL OF BELOW TO ABOVE CLI BASED SYSTEM
-
-    
+   
     @tasks.loop(minutes=10.0)
     async def check_prices(self):
         channel = self.bot.get_channel(self.channel_id)
@@ -332,8 +326,8 @@ class WatchCog(commands.Cog):
                 if symbol not in user_map[user].keys(): user_map[user][symbol] = []
 
                 user_map[user][symbol].append({
-                    'BOUND': f'${ utils.atos(bound) }',
-                    'PRICE': f'${ utils.atos(prices["data"][symbol]) }',
+                    'BOUND': f'{ self.format_price(utils.atos(bound)) }',
+                    'PRICE': f'{ self.format_price(prices["data"][symbol]) }',
                 })
 
                 sql = 'UPDATE watch_cog SET status=1 WHERE id=%s'
@@ -347,128 +341,6 @@ class WatchCog(commands.Cog):
         cur.close()
         dbh.close()
         return
-
-    # @commands.command(name="watch", pass_context=True)
-    # async def watch(self, ctx):
-    #     # Only allow watch command in "crypto-prices" channel
-    #     if ctx.channel.id != self.channel_id and ctx.channel.id != CONFIG['DEV_CHANNEL']:
-    #         await ctx.channel.send("Please send watch commands in <#829037611841749063>")
-    #         return
-
-    #     m = re.match(rf'{ CONFIG["PREFIX"] }watch ([a-zA-Z0-9]+) (?:\$)?(\d+(?:\.\d+)?)(?: (?:\$)?(\d+(?:\.\d+)?))?$', ctx.message.content)
-    #     if m is None:
-    #         await ctx.channel.send(
-    #         f"Could not parse required information, please follow the format:\n`{ CONFIG['PREFIX'] }watch SYMBOL [$]0[.00][ [$]0[.00]]`"
-    #         )
-    #         return
-
-    #     symbol, price_1, price_2 = m.groups()
-    #     ubnd = lbnd = None
-
-    #     symbol = symbol.upper()
-    #     if price_2 is not None:
-    #         ubnd = max(utils.atof(price_1), utils.atof(price_2))
-    #         lbnd = min(utils.atof(price_1), utils.atof(price_2))
-    #     else:
-    #         # Only fetch prices if needed (gotta save our credits)
-    #         prices = self.fetch_data([symbol])
-    #         if prices['stat'] != 0:
-    #             await ctx.channel.send(prices['msg'])
-    #             return
-    #         cur_price = prices['data'][symbol]
-            
-    #         # preserves None value for unused bound
-    #         bnd  = utils.atof(price_1)
-    #         if cur_price > bnd: lbnd = bnd
-    #         else:               ubnd = bnd
-
-    #     if ubnd == 0 or lbnd == 0:
-    #         await ctx.channel.send("You are not allowed to enter 0 as a price marker, please try again.")
-    #         return
-
-    #     dbh = db.get_dbh()
-    #     cur = dbh.cursor(buffered=True)
-
-    #     sql = 'INSERT INTO watch_cog (symbol, user, lower, upper) VALUES (%s, %s, %s, %s)'
-    #     cur.execute(sql, (symbol, ctx.author.id, lbnd, ubnd))
-
-    #     await ctx.channel.send(f"Orders recieved, now watching *{ symbol }*")
-
-    #     dbh.commit()
-    #     cur.close()
-    #     dbh.close()
-
-    #     return
-
-    # @commands.command(name="watchlist", pass_context=True)
-    # async def watchlist(self, ctx):
-    #     dbh = db.get_dbh()
-    #     cur = dbh.cursor(buffered=True)
-
-    #     sql  = 'SELECT * FROM watch_cog WHERE user=%s AND status=0'
-    #     ret  = db.select(cur, sql, (ctx.author.id,))
-
-    #     symbols = set() # Get unique set of SYMBOLS to poll from CMC
-    #     [symbols.add(r['symbol']) for r in ret]
-
-    #     if not len(symbols):
-    #         await ctx.channel.send("You are not currently tracking any coins")
-    #         return
-        
-    #     prices = self.fetch_data(symbols)
-    #     if prices['stat'] != 0:
-    #         await channel.send(prices['msg'])
-    #         return
-
-    #     rows = []
-    #     for i, r in enumerate(ret):
-    #         price = prices['data'][r['symbol']]
-    #         rows.append([utils.atos(x) for x in [r['id'], r['symbol'], r['lower'], r['upper'], price]])
-
-    #     table = tmp.gen_table(['ID', 'Symbol', 'Lower Bound', 'Upper Bound', 'Current Price'], rows)
-    #     await ctx.channel.send(table)
-
-    #     cur.close()
-    #     dbh.close()
-    #     return
-
-    # @commands.command(name="watchdel", pass_context=True)
-    # async def watchdel(self, ctx):
-
-    #     m = re.match(rf'{ CONFIG["PREFIX"] }watchdel (\d+)$', ctx.message.content)
-    #     if m is None:
-    #         await ctx.channel.send(
-    #         f"Could not parse required information, please follow the format:\n`{ CONFIG['PREFIX'] }watchdel ID`"
-    #         )
-    #         return
-
-    #     row_id = m.groups()[0]
-
-    #     dbh = db.get_dbh()
-    #     cur = dbh.cursor(buffered=True)
-
-    #     sql  = 'SELECT * FROM watch_cog WHERE user=%s AND status=0 AND id=%s'
-    #     row  = db.select_one(cur, sql, (ctx.author.id, row_id))
-
-    #     if row is None:
-    #         await ctx.channel.send(
-    #         f"Could not locate ID { row_id } for USER <@{ ctx.author.id }>, please try again with an ID from `{ CONFIG['PREFIX'] }watchlist`."
-    #         )
-    #         cur.close()
-    #         dbh.close()
-    #         return
-
-    #     sql = 'UPDATE watch_cog SET status=1 WHERE user=%s AND status=0 AND id=%s'
-    #     cur.execute(sql, (ctx.author.id,row_id))
-    #     dbh.commit()
-
-    #     await ctx.channel.send(
-    #     f"Orders recieved. No longer watching ID { row_id }: { row['symbol'] }"
-    #     )
-        
-    #     cur.close()
-    #     dbh.close()
-    #     return
 
     def fetch_data(self, symbols):
         url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
@@ -518,5 +390,17 @@ class WatchCog(commands.Cog):
             ret['stat'] = -1
             return ret
 
+    def format_price(self, price):
+        price = utils.atof(price)
+        if price > 0.05:
+            return f'${price:.3f}'
+        if price > 0.005:
+            return f'${price:.4f}'
+        if price > 0.0005:
+            return f'${price:.5f}'
+        if price > 0.00005:
+            return f'${price:.6f}'
+        return f'${price:.7f}'
+    
 def setup(bot: commands.Bot):
     bot.add_cog(WatchCog(bot))
