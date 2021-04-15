@@ -392,7 +392,9 @@ class WatchCog(commands.Cog):
 
     def format_price(self, price):
         price = utils.atof(price)
-        if price > 5:
+        if price.is_integer():
+            return f'${price:,.0f}'
+        if price > 10:
             return f'${price:,.2f}'
         if price > 0.05:
             return f'${price:.3f}'
