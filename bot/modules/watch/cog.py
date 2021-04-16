@@ -11,7 +11,7 @@ import json
 
 class WatchCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
-        self.channel_id = 829037611841749063
+        self.channel_id = CONFIG['WATCH_CHANNEL'] if CONFIG['BOT_LIVE'] else CONFIG['DEV_CHANNEL']
         self.bot = bot
 
         self.help_msg = (
@@ -48,15 +48,15 @@ class WatchCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         self.check_prices.start()
-        
+
     def cog_unload(self):
         self.check_prices.cancel()
 
     @commands.command(name="watch", pass_context=True)
     async def watchcli(self, ctx, mode=None, *args):
         # Only allow watch command in "crypto-prices" channel
-        if ctx.channel.id != self.channel_id and ctx.channel.id != CONFIG['DEV_CHANNEL']:
-            await ctx.channel.send(f"Please send watch commands in <#{ CONFIG['DEV_CHANNEL'] }>")
+        if ctx.channel.id != self.channel_id:
+            await ctx.channel.send(f"Please send watch commands in <#{ self.channel_id }>")
             return
 
         if mode is not None and mode.upper() in self.dispatch.keys():
@@ -78,7 +78,7 @@ class WatchCog(commands.Cog):
         m = re.match(rf'([a-zA-Z0-9]+) (?:\$)?(\d+(?:\.\d+)?)(?: (?:\$)?(\d+(?:\.\d+)?))?$', ' '.join(args))
         if m is None: # show help
             embed = discord.Embed(title='Help', description='add accepts 3 positional arguments: `SYMBOL PRICE PRICE`')
-            
+
             #\u200b for "no name field"
             embed.add_field(name='Formatting', value=f"`{ CONFIG['PREFIX'] }watch add SYMBOL [$]0[.00][ [$]0[.00]]`", inline=False)
             embed.add_field(name='How it works', inline=False, value=(
@@ -97,14 +97,14 @@ class WatchCog(commands.Cog):
 
             await ctx.channel.send(embed=embed)
             return
-            
+
 
         symbol, price_1, price_2 = m.groups()
         ubnd = lbnd = None
 
         symbol = symbol.upper()
 
-        prices = self.fetch_data([symbol])
+        prices = self.fetch_price([symbol])
         if prices['stat'] != 0:
             embed = discord.Embed(title=f"Error: { prices['stat'] }", description=prices['msg'], color=0xa33b24)
             await ctx.channel.send(embed=embed)
@@ -145,9 +145,9 @@ class WatchCog(commands.Cog):
             embed.add_field(name="Upper Bound", value=self.format_price(ubnd))
         if lbnd is not None:
             embed.add_field(name="Lower Bound", value=self.format_price(lbnd))
-            
+
         await ctx.channel.send(embed=embed)
-        
+
         dbh.commit(); cur.close()
         dbh.close()
 
@@ -164,7 +164,7 @@ class WatchCog(commands.Cog):
             if len(rows) == 0:
                 err.append(arg)
                 continue
-            
+
             for row in rows:
                 if row['id'] in ids:
                     continue # avoid duplicates
@@ -173,10 +173,10 @@ class WatchCog(commands.Cog):
                 if row['symbol'] not in info.keys():
                     info[row['symbol']] = []
                 info[row['symbol']].append(row)
-            
+
         if len(ids) == 0: # HELP
             embed = discord.Embed(title='Help', description='del accepts an arbitrary number of IDs and SYMBOLS: `(ID|SYMBOL)[ (ID|SYMBOL)...]`')
-            
+
             #\u200b for "no name field"
             embed.add_field(name='Formatting', value=f"`{ CONFIG['PREFIX'] }watch del (ID|SYMBOL)[ (ID|SYMBOL)...]`", inline=False)
             embed.add_field(name='How it works', inline=False, value=(
@@ -206,22 +206,22 @@ class WatchCog(commands.Cog):
                 if d['lower']: s += f" | Lower Bound: { self.format_price(d['lower']) }"
                 s += '`'
                 v.append(s)
-                
+
             embed.add_field(name=symbol, value='\n'.join(v))
-        
+
         await ctx.channel.send(embed=embed)
 
         if len(err):
             embed = discord.Embed(title=f"Error: Could not delete the following", description='\n'.join(err), color=0xa33b24)
             await ctx.channel.send(embed=embed)
-            
+
         cur.close(); dbh.commit()
         dbh.close()
 
     async def list_token(self, ctx, *args):
         if len(args) != 0: # HELP
-            embed = discord.Embed(title='Help', description='Info does not accept any arguments.')
-            
+            embed = discord.Embed(title='Help', description='list does not accept any arguments.')
+
             #\u200b for "no name field"
             embed.add_field(name='Formatting', value=f"`{ CONFIG['PREFIX'] }watch list`", inline=False)
             embed.add_field(name='How it works', inline=False, value=(
@@ -232,7 +232,7 @@ class WatchCog(commands.Cog):
             await ctx.channel.send(embed=embed)
             return
 
-        
+
         dbh = db.get_dbh()
         cur = dbh.cursor(buffered=True)
 
@@ -250,8 +250,8 @@ class WatchCog(commands.Cog):
             )
             await ctx.channel.send(embed=embed)
             return
-        
-        prices = self.fetch_data(symbols)
+
+        prices = self.fetch_price(symbols)
         if prices['stat'] != 0:
             embed = discord.Embed(title=f"Error: { prices['stat'] }", description=prices['msg'], color=0xa33b24)
             await ctx.channel.send(embed=embed)
@@ -277,22 +277,55 @@ class WatchCog(commands.Cog):
                 if i['lower']: s += f" | Lower Bound: { self.format_price(i['lower']) }"
                 s += '`'
                 v.append(s)
-                
+
             embed.add_field(name=f"\n{ symbol }  --  { self.format_price(prices['data'][symbol]) }", value='\n'.join(v), inline=False)
 
         await ctx.channel.send(embed=embed)
         cur.close(); dbh.close()
 
     async def token_info(self, ctx, *args):
-        return
-   
+        if len(args) == 0 or args[0].lower() == 'help':
+            embed = discord.Embed(title='Help', description='Info accepts a space seperate list of SYMBOLS to return info on.')
+
+            #\u200b for "no name field"
+            embed.add_field(name='Formatting', value=f"`{ CONFIG['PREFIX'] }watch info SYMBOL[ [SYMBOL]...]`", inline=False)
+            embed.add_field(name='How it works', inline=False, value=(
+                "The info command accepts any number of SYMBOLs as arguments. When called, it will "
+                "simply return the information regarding any and all SYMBOLs passed to it."
+            ))
+            await ctx.channel.send(embed=embed)
+            return
+
+        data = self.fetch_info(args)
+
+        if data['stat'] != 0:
+            embed = discord.Embed(title=f"Error: { data['stat'] }", description=data['msg'], color=0xa33b24)
+            await ctx.channel.send(embed=embed)
+            return
+
+
+        for symbol, info in data['data'].items():
+            embed = discord.Embed(
+                color       = 0x24a36a,
+                title       = f'{ symbol }',
+                description = f'This is the coin you are looking for...',
+            )
+            embed.add_field(name='Price',          value=self.format_price(info['price']))
+            embed.add_field(name='Market Cap',     value=self.format_price(info['m_cap']))
+            embed.add_field(name='24 Hour Volume', value=self.format_price(info['vol24']))
+            embed.add_field(name='1 Hour Change',  value=self.format_percent(info['chng_1h']))
+            embed.add_field(name='24 Hour Change', value=self.format_percent(info['chng_24h']))
+            embed.add_field(name='7 Day Change',   value=self.format_percent(info['chng_7d']))
+
+            await ctx.channel.send(embed=embed)
+
     @tasks.loop(minutes=10.0)
     async def check_prices(self):
         channel = self.bot.get_channel(self.channel_id)
 
         dbh = db.get_dbh()
         cur = dbh.cursor(buffered=True)
-        
+
         sql = 'SELECT * FROM watch_cog WHERE status=0'
         ret = db.select(cur, sql, null_as_blank=False)
 
@@ -301,8 +334,8 @@ class WatchCog(commands.Cog):
 
         if not len(symbols):
             return
-        
-        prices = self.fetch_data(symbols)
+
+        prices = self.fetch_price(symbols)
         if prices['stat'] != 0:
             embed = discord.Embed(title=f"Error: { prices['stat'] }", description=f"While checking targets, I ran into an issue.\n\n{ prices['msg'] }", color=0xa33b24)
             await channel.send(embed=embed)
@@ -382,21 +415,72 @@ class WatchCog(commands.Cog):
                 logger.error(f"Could not fetch from CMC: { stat }")
                 return ret
 
-            for symbol, info in json.loads(response.text).get('data', {}).items():
-                price = info.get('quote', {}).get('USD', {}).get('price', None)
-                if price is None:
-                    logger.error(f"Parsed '{ price }' for price on symbol '{ symbol }'")
-                    ret['stat'] = -1
-                    ret['msg'] = "Failed to parse price information, please try again.\n<@280231128852332544> I'm having issues..."
-                    return ret
-
-                ret['data'][symbol] = price
+            ret['data'] = data
             return ret
-        
+
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             logger.error(e)
             ret['stat'] = -1
             return ret
+
+    def fetch_price(self,symbols):
+        data = self.fetch_data(symbols)
+
+        if data['stat'] != 0:
+            return data
+
+        ret = {
+            'data': {},
+            'stat': 0,
+            'msg' : '',
+        }
+
+        for symbol, info in data['data'].get('data', {}).items():
+            price = info.get('quote', {}).get('USD', {}).get('price', None)
+            if price is None:
+                logger.error(f"Parsed '{ price }' for price on symbol '{ symbol }'")
+                ret['stat'] = -1
+                ret['msg']  = "Failed to parse price information, please try again.\n<@CONFIG['ADMIN_NOTIFY']> I'm having issues..."
+                return ret
+
+            ret['data'][symbol] = price
+        return ret
+
+    def fetch_info(self,symbols):
+        data = self.fetch_data(symbols)
+
+        if data['stat'] != 0:
+            return data
+
+        ret = {
+            'data': {},
+            'stat': 0,
+            'msg' : '',
+        }
+
+        for symbol, info in data['data'].get('data', {}).items():
+            price    = info.get('quote', {}).get('USD', {}).get('price',              None)
+            m_cap    = info.get('quote', {}).get('USD', {}).get('market_cap',         None)
+            vol24    = info.get('quote', {}).get('USD', {}).get('volume_24h',         None)
+            chng_1h  = info.get('quote', {}).get('USD', {}).get('percent_change_1h',  None)
+            chng_24h = info.get('quote', {}).get('USD', {}).get('percent_change_24h', None)
+            chng_7d  = info.get('quote', {}).get('USD', {}).get('percent_change_7d',  None)
+
+            if price is None or m_cap is None or vol24 is None or chng_1h is None or chng_24h is None or chng_7d is None:
+                logger.error(f"Parsing error: recieved None for item on symbol '{ symbol }': { info }")
+                ret['stat'] = -1
+                ret['msg']  = "Failed to parse price information, please try again.\n<@CONFIG['ADMIN_NOTIFY']> I'm having issues..."
+                return ret
+
+            ret['data'][symbol] = {
+                'price':    price,
+                'm_cap':    m_cap,
+                'vol24':    vol24,
+                'chng_1h':  chng_1h,
+                'chng_24h': chng_24h,
+                'chng_7d':  chng_7d,
+            }
+        return ret
 
     def format_price(self, price):
         price = utils.atof(price)
@@ -404,21 +488,43 @@ class WatchCog(commands.Cog):
             return f'${price:,.0f}'
         if price > 10:
             return f'${price:,.2f}'
-        if price > 0.05:
+        if price > 0.01:
             return f'${price:.3f}'
-        if price > 0.005:
+        if price > 0.001:
             return f'${price:.4f}'
-        if price > 0.0005:
+        if price > 0.0001:
             return f'${price:.5f}'
-        if price > 0.00005:
+        if price > 0.00001:
             return f'${price:.6f}'
-        if price > 0.000005:
+        if price > 0.000001:
             return f'${price:.7f}'
-        if price > 0.0000005:
+        if price > 0.0000001:
             return f'${price:.8f}'
-        if price > 0.00000005:
+        if price > 0.00000001:
             return f'${price:.9f}'
         return f'${price:.12f}'
-    
+
+    def format_percent(self, percent):
+        percent = utils.atof(percent)
+        if abs(percent).is_integer():
+            return f'{percent:,.0f}%'
+        if abs(percent) > 10:
+            return f'{percent:,.2f}%'
+        if abs(percent) > 0.01:
+            return f'{percent:.3f}%'
+        if abs(percent) > 0.001:
+            return f'{percent:.4f}%'
+        if abs(percent) > 0.0001:
+            return f'{percent:.5f}%'
+        if abs(percent) > 0.00001:
+            return f'{percent:.6f}%'
+        if abs(percent) > 0.000001:
+            return f'{percent:.7f}%'
+        if abs(percent) > 0.0000001:
+            return f'{percent:.8f}%'
+        if abs(percent) > 0.00000001:
+            return f'{percent:.9f}%'
+        return f'{percent:.12f}%'
+
 def setup(bot: commands.Bot):
     bot.add_cog(WatchCog(bot))
