@@ -52,21 +52,6 @@ class WatchCog(commands.Cog):
     def cog_unload(self):
         self.check_prices.cancel()
 
-    @commands.command(name="test1", pass_context=True)
-    async def test1(self, ctx, mode=None, *args):
-        channel = self.bot.get_channel(self.channel_id)
-        await channel.send("This is a test @squirrelzar#0429")
-
-    @commands.command(name="test2", pass_context=True)
-    async def test2(self, ctx, mode=None, *args):
-        channel = self.bot.get_channel(self.channel_id)
-        await channel.send("This is a test @squirrelzar")
-
-    @commands.command(name="test3", pass_context=True)
-    async def test3(self, ctx, mode=None, *args):
-        channel = self.bot.get_channel(self.channel_id)
-        await channel.send("This is a test <@280231128852332544>")
-
     @commands.command(name="watch", pass_context=True)
     async def watchcli(self, ctx, mode=None, *args):
         # Only allow watch command in "crypto-prices" channel
