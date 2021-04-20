@@ -319,7 +319,7 @@ class WatchCog(commands.Cog):
 
             await ctx.channel.send(embed=embed)
 
-    @tasks.loop(minutes=10.0)
+    @tasks.loop(minutes=7.0)
     async def check_prices(self):
         channel = self.bot.get_channel(self.channel_id)
 
