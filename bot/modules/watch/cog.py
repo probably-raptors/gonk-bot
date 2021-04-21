@@ -370,14 +370,14 @@ class WatchCog(commands.Cog):
             embed = discord.Embed(
                 color       = 0x24a36a,
                 title       = 'Gonk Ticker',
-                description = f'<@{ user }> I have an update for you!',
+                description = 'I have an update for you!',
             )
 
             for symbol, msgs in data.items():
                 for msg in msgs:
                     embed.add_field(name=f"{ symbol }  --  { self.format_price(prices['data'][symbol]) }", value=msg, inline=False)
 
-            await channel.send(embed=embed)
+            await channel.send(f'<@{ user }>', embed=embed)
 
         dbh.commit(); cur.close()
         dbh.close()
@@ -411,7 +411,7 @@ class WatchCog(commands.Cog):
 
             if error != 0:
                 ret['stat'] = error
-                ret['msg'] = f"I've encountered an HTTP error, please try again.\n<@{ CONFIG['ADMIN_NOTIFY'] }> I'm having issues..."
+                ret['msg'] = f"I've encountered an HTTP error, please try again."
                 logger.error(f"Could not fetch from CMC: { stat }")
                 return ret
 
@@ -440,7 +440,7 @@ class WatchCog(commands.Cog):
             if price is None:
                 logger.error(f"Parsed '{ price }' for price on symbol '{ symbol }'")
                 ret['stat'] = -1
-                ret['msg']  = "Failed to parse price information, please try again.\n<@CONFIG['ADMIN_NOTIFY']> I'm having issues..."
+                ret['msg']  = "Failed to parse price information, please try again."
                 return ret
 
             ret['data'][symbol] = price
@@ -469,7 +469,7 @@ class WatchCog(commands.Cog):
             if price is None or m_cap is None or vol24 is None or chng_1h is None or chng_24h is None or chng_7d is None:
                 logger.error(f"Parsing error: recieved None for item on symbol '{ symbol }': { info }")
                 ret['stat'] = -1
-                ret['msg']  = "Failed to parse price information, please try again.\n<@CONFIG['ADMIN_NOTIFY']> I'm having issues..."
+                ret['msg']  = "Failed to parse price information, please try again."
                 return ret
 
             ret['data'][symbol] = {
