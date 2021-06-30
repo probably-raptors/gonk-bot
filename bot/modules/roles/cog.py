@@ -18,19 +18,19 @@ class RolesCog(commands.Cog):
     @has_permissions(manage_roles=True)
     async def add_roles(self, ctx: commands.Context):
         """A command to manually assign roles to members"""
-        """.add [Member1, Member2, ...] [Role1, Role2, ...]"""
+        """.add Member [Role1, Role2, ...]"""
 
-        tokens = get_tokens(ctx.message.content)
-        await update_roles(ctx, tokens, flag="a")
+        tokens = get_tokens(ctx.message.content.removeprefix(".add"))
+        await update_roles(ctx, tokens, action="add")
 
     @commands.command(name="remove", pass_context=True)
     @has_permissions(manage_roles=True)
     async def remove_roles(self, ctx):
         """A command to manually remove roles from members"""
-        """.remove [Member1, Member2, ...] [Role1, Role2, ...]"""
+        """.remove Member [Role1, Role2, ...]"""
 
-        tokens = get_tokens(ctx.message.content)
-        await update_roles(ctx, tokens, flag="r")
+        tokens = get_tokens(ctx.message.content.removeprefix(".remove"))
+        await update_roles(ctx, tokens, action="remove")
 
 
 def setup(bot: commands.Bot):
