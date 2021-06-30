@@ -1,4 +1,4 @@
-import discord
+import discord, re
 
 
 def get_tokens(msg: str):
