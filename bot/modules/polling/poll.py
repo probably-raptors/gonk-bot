@@ -1,4 +1,3 @@
-from typing import Dict
 import discord
 
 # TODO
@@ -13,7 +12,7 @@ class Poll:
         self.options = self.get_options()
         self.reacts = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
         self.embed = self.create_embed()
-        self.voters: Dict[discord.Member, discord.Reaction] = {}
+        self.voters = {}
 
     def get_title(self) -> str:
         return self.msg.content.split(",")[1].strip()
