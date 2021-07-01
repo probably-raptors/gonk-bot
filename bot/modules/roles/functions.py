@@ -1,22 +1,18 @@
-import discord, re
+import discord
 
 
 def get_tokens(msg: str):
-    """Tokenize command string like so: { member, [role1, role2, ...] }"""
+    """Tokenize command string like so: { (action: action), (member: member), (roles: [role1, role2, ...]) }"""
 
-    args = str.split(" ")
-    member = args[1].strip()
-    roles = args[2:]
-
+    args = msg.split()
     tokens = {
-        "member": member,
-        "roles": [x.strip() for x in roles.split(",")],
+        "member": args[1].strip(),
+        "roles": args[2:],
     }
-
     return tokens
 
 
-async def update_roles(ctx, tokens, action):
+async def update_roles(ctx, tokens, action: str):
     m = discord.utils.find(lambda m: m.name == tokens["member"], ctx.guild.members)
     if m is not None:
         for role in tokens["roles"]:

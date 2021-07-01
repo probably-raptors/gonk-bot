@@ -16,21 +16,30 @@ class RolesCog(commands.Cog):
 
     @commands.command(name="add", pass_context=True)
     @has_permissions(manage_roles=True)
-    async def add_roles(self, ctx: commands.Context):
+    async def add_roles(self, ctx):
         """A command to manually assign roles to members"""
-        """.add Member [Role1, Role2, ...]"""
+        """.add Member Role1 Role2 ..."""
 
-        tokens = get_tokens(ctx.message.content.removeprefix(".add"))
-        await update_roles(ctx, tokens, action="add")
+        tokens = get_tokens(
+            ctx.message.content
+        )  # automatically strips command from message string
+        await update_roles(ctx, tokens, "add")
 
     @commands.command(name="remove", pass_context=True)
     @has_permissions(manage_roles=True)
     async def remove_roles(self, ctx):
         """A command to manually remove roles from members"""
-        """.remove Member [Role1, Role2, ...]"""
+        """.remove Member Role1 Role2 ..."""
 
-        tokens = get_tokens(ctx.message.content.removeprefix(".remove"))
-        await update_roles(ctx, tokens, action="remove")
+        tokens = get_tokens(
+            ctx.message.content
+        )  # automatically strips command from message string
+        await update_roles(ctx, tokens, "remove")
+
+    @add_roles.error
+    @remove_roles.error
+    async def roles_error(self, ctx: commands.Context, err: commands.CommandError):
+        await ctx.send(f"{err}")
 
 
 def setup(bot: commands.Bot):
