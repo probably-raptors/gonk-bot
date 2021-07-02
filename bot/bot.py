@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, random, os
+import discord
 from config import CONFIG
 
 # Enable privledged intents for bot
@@ -14,6 +14,7 @@ extensions = [
     "modules.sarcasm.cog",
     "modules.roles.cog",
     "modules.watch.cog",
+    "modules.poll.cog",
 ]
 
 for extension in extensions:
