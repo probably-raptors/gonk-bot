@@ -44,7 +44,6 @@ class WatchCog(commands.Cog):
             },
         }
 
-
     @commands.Cog.listener()
     async def on_ready(self):
         self.check_prices.start()
