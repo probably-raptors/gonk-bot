@@ -8,7 +8,7 @@ class PingCog(commands.Cog):
 
     @commands.command(name="ping", pass_context=True)
     async def ping(self, ctx):
-        """ A simple command that responds to a ping """
+        """A simple command that responds to a ping"""
 
         with open("bot/modules/ping/responses.txt") as responses:
             await ctx.send(random.choice(responses.readlines()))

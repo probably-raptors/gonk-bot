@@ -5,6 +5,7 @@ def atoi(s):
     except:
         return 0
 
+
 def atof(s):
     # convert object s to float without exception
     try:
@@ -12,9 +13,10 @@ def atof(s):
     except:
         return 0
 
+
 def atos(s):
     # convert object s to str without exception
     try:
         return str(s)
     except:
-        return ''
+        return ""
