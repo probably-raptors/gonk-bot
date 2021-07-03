@@ -1,4 +1,5 @@
 import discord
+from discord import reaction
 
 # TODO
 # add error handling for getters
@@ -9,7 +10,8 @@ class Poll:
         self.title = self.get_title()
         self.duration = self.get_duration()
         self.options = self.get_options()
-        self.reacts = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
+        self.reacts = ["1️⃣", "2️⃣", "3️⃣", "4️⃣",
+                       "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
         self.embed = self.create_embed()
         self.voters = {}
 
@@ -28,5 +30,12 @@ class Poll:
             name=self.msg.author.display_name, icon_url=self.msg.author.avatar_url
         )
         for i in range(len(self.options)):
-            embed.add_field(name=self.options[i], value=self.emojis[i], inline=True)
+            embed.add_field(name=self.reacts[i],
+                            value=self.options[i], inline=True)
         return embed
+
+    async def vote(self, msg: discord.Message, member: discord.Member, emoji: discord.partial_emoji):
+        if member not in self.voters.keys:
+            self.voters[member] = emoji
+        else:
+            await msg.remove_reaction(emoji, member)

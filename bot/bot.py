@@ -6,15 +6,16 @@ from config import CONFIG
 intents = discord.Intents.default()
 intents.guilds = True
 intents.members = True
+intents.reactions = True
 
 bot = commands.Bot(CONFIG["PREFIX"], intents=intents)
 
 extensions = [
     "modules.ping.cog",
-    "modules.sarcasm.cog",
-    "modules.roles.cog",
-    "modules.watch.cog",
     "modules.poll.cog",
+    "modules.roles.cog",
+    "modules.sarcasm.cog",
+    "modules.watch.cog",
 ]
 
 for extension in extensions:
