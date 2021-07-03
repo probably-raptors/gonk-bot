@@ -1,15 +1,14 @@
 import discord
-from discord import reaction
 
 # TODO
-# add error handling for getters
+# error handling
 
 
 class Poll:
     def __init__(self, msg: discord.Message):
-        self.title = self.get_title()
-        self.duration = self.get_duration()
-        self.options = self.get_options()
+        self.title = self.get_title(msg)
+        self.duration = self.get_duration(msg)
+        self.options = self.get_options(msg)
         self.reacts = ["1️⃣", "2️⃣", "3️⃣", "4️⃣",
                        "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
         self.embed = self.create_embed()
