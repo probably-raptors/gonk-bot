@@ -1,6 +1,6 @@
 from discord.ext.commands.core import has_permissions
-from .poll import Poll
 from discord.ext import commands
+from .poll import Poll
 import discord
 
 
@@ -15,7 +15,10 @@ class PollCog(commands.Cog):
         """A command for users to create polls for other users to vote on"""
         """.poll Title Duration Option1 ... Option9"""
         poll = Poll(ctx.message)
-        await ctx.send(embed=poll.embed)
+        msg = await ctx.send(embed=poll.embed, delete_after=poll.duration)
+        for i, opt in enumerate(poll.options):
+            await msg.add_reaction(poll.reacts[i])
+
         self.polls[ctx.message.id] = poll
         await ctx.message.delete()
 
@@ -25,9 +28,9 @@ class PollCog(commands.Cog):
             await self.vote(ctx.message, payload.member, payload.emoji)
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
-        if payload.member in self.voters.keys:
-            self.voters.pop(payload.member, None)
+    async def on_raw_reaction_remove(self, ctx, payload: discord.RawReactionActionEvent):
+        if ctx.message.id in self.polls.keys:
+            self.unvote(self, payload)
 
 
 def setup(bot: commands.Bot):

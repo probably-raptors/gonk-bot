@@ -2,6 +2,7 @@ import discord
 
 # TODO
 # error handling
+# multiply duration by some factor for use with ctx.send.delete_after
 
 
 class Poll:
@@ -38,3 +39,6 @@ class Poll:
             self.voters[member] = emoji
         else:
             await msg.remove_reaction(emoji, member)
+
+    def unvote(self, payload: discord.RawReactionActionEvent):
+        self.voters.pop(payload.member)
