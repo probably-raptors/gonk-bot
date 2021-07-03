@@ -1,7 +1,6 @@
 from discord.ext.commands.core import has_permissions
-from bot.modules.poll.poll import Poll
+from .poll import Poll
 from discord.ext import commands
-from discord import client
 import discord
 
 
@@ -21,12 +20,12 @@ class PollCog(commands.Cog):
         await ctx.message.delete()
 
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, ctx, payload: discord.onRawReactionEvent):
+    async def on_raw_reaction_add(self, ctx, payload: discord.RawReactionActionEvent):
         if payload.message_id in self.polls and not payload.member.bot:
             await self.vote(ctx.message, payload.member, payload.emoji)
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload: discord.onRawReactionEvent):
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         if payload.member in self.voters.keys:
             self.voters.pop(payload.member, None)
 
