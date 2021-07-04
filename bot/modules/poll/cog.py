@@ -15,21 +15,22 @@ class PollCog(commands.Cog):
         """A command for users to create polls for other users to vote on"""
         """.poll Title Duration Option1 ... Option9"""
         poll = Poll(ctx.message)
-        msg = await ctx.send(embed=poll.embed, delete_after=poll.duration)
-        for i in enumerate(poll.options):
+        msg = await ctx.send(embed=poll.embed, delete_after=float(poll.duration))
+        for i, opt in enumerate(poll.options):
             await msg.add_reaction(poll.reacts[i])
 
+        # this is the id of the embed, NOT the triggering message
         self.polls[ctx.message.id] = poll
         await ctx.message.delete()
 
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, ctx, payload: discord.RawReactionActionEvent):
-        if payload.message_id in self.polls and not payload.member.bot:
-            await self.vote(ctx.message, payload.member, payload.emoji)
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        if payload.message_id in self.polls.keys() and not payload.member.bot:
+            await self.vote(payload.member, payload.emoji)
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, ctx, payload: discord.RawReactionActionEvent):
-        if ctx.message.id in self.polls.keys:
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
+        if payload.message_id in self.polls.keys():
             self.unvote(self, payload)
 
 

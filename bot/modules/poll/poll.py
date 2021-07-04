@@ -35,14 +35,23 @@ class Poll:
             name=msg.author.display_name, icon_url=msg.author.avatar_url
         )
         for i, r in enumerate(self.reacts):
-            embed.add_field(name=self.options[i], value=r, inline=True)
+            embed.add_field(name=r, value=self.options[i], inline=True)
         return embed
 
-    async def vote(self, msg: discord.Message, member: discord.Member, emoji: discord.partial_emoji):
-        if member not in self.voters.keys:
-            self.voters[member] = emoji
+    async def vote(self, payload: discord.RawReactionActionEvent):
+        msg = self.bot.get_channel(payload.channel_id).fetch_message(
+            payload.message_id)
+
+        if payload.emoji not in msg.reactions:
+            # reactions added via the triggering command are the only allowed reactions
+            await msg.remove_reaction(payload.emoji, payload.member)
+            return
+
+        if payload.member not in self.voters.keys():
+            self.voters[payload.member] = payload.emoji
         else:
-            await msg.remove_reaction(emoji, member)
+            # do not allow users to react more than once
+            await msg.remove_reaction(payload.emoji, payload.member)
 
     def unvote(self, payload: discord.RawReactionActionEvent):
         self.voters.pop(payload.member)
