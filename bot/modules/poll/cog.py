@@ -16,7 +16,7 @@ class PollCog(commands.Cog):
         """.poll Title Duration Option1 ... Option9"""
         poll = Poll(ctx.message)
         msg = await ctx.send(embed=poll.embed, delete_after=poll.duration)
-        for i, opt in enumerate(poll.options):
+        for i in enumerate(poll.options):
             await msg.add_reaction(poll.reacts[i])
 
         self.polls[ctx.message.id] = poll
