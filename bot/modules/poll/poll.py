@@ -8,25 +8,27 @@ import discord
 class Poll:
     def __init__(self, msg: discord.Message):
         self.title = self.get_title(msg)
-        self.duration = self.get_duration(msg)
-        self.options = self.get_options(msg)
-        self.reacts = self.get_reacts(len(self.options))
+        self.duration = self.get_duration(msg) * 60
+        self.reacts = self.get_reacts(msg)
         self.embed = self.create_embed(msg)
         self.voters = {}
 
     def get_title(self, msg: discord.Message) -> str:
         return msg.content.split()[1]
 
-    def get_duration(self, msg: discord.Message) -> float:
-        return msg.content.split()[2]
+    def get_duration(self, msg: discord.Message) -> int:
+        return int(msg.content.split()[2])
 
-    def get_options(self, msg: discord.Message):
-        return msg.content.split()[3:]
-
-    def get_reacts(self, numOpts):
+    def get_reacts(self, msg: discord.Message) -> dict:
+        options = msg.content.split()[3:]
         emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣",
                   "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
-        reacts = emojis[:numOpts]
+
+        # zip() stops after the end of the shorter list,
+        # so if there are more options than emojis only 9 options will be saved,
+        # and if there are more emojis than options only [option] number of emojis will be saved
+        # NOTE: this will also automatically ignore repeated keys (options)
+        reacts = dict(zip(options, emojis))
         return reacts
 
     def create_embed(self, msg: discord.Message):
@@ -34,24 +36,25 @@ class Poll:
         embed.set_author(
             name=msg.author.display_name, icon_url=msg.author.avatar_url
         )
-        for i, r in enumerate(self.reacts):
-            embed.add_field(name=r, value=self.options[i], inline=True)
+        for key, val in self.reacts.items():
+            embed.add_field(name=key, value=val, inline=True)
         return embed
 
-    async def vote(self, payload: discord.RawReactionActionEvent):
-        msg = self.bot.get_channel(payload.channel_id).fetch_message(
-            payload.message_id)
-
-        if payload.emoji not in msg.reactions:
-            # reactions added via the triggering command are the only allowed reactions
-            await msg.remove_reaction(payload.emoji, payload.member)
+    async def vote(self, member: discord.Member, emoji: discord.PartialEmoji, msg: discord.Message):
+        if emoji not in self.reacts.values():
+            # do not allow users to add additional reactions
+            await msg.remove_reaction(emoji, member)
+            print("Member attempted to add option, removed")
             return
 
-        if payload.member not in self.voters.keys():
-            self.voters[payload.member] = payload.emoji
-        else:
+        if member in self.voters.keys():
             # do not allow users to react more than once
-            await msg.remove_reaction(payload.emoji, payload.member)
+            await msg.remove_reaction(emoji, member)
+            print("Member attempted to vote more than once, removed")
+            return
 
-    def unvote(self, payload: discord.RawReactionActionEvent):
-        self.voters.pop(payload.member)
+        self.voters[member] = emoji
+        print("Member Voted")
+
+    def unvote(self, member: discord.Member):
+        self.voters.pop(member, None)
