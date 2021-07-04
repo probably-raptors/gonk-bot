@@ -174,7 +174,7 @@ class WatchCog(commands.Cog):
                     info[row['symbol']] = []
                 info[row['symbol']].append(row)
 
-        if len(ids) == 0: # HELP
+        if len(args) == 0 or args[0].upper() == 'HELP': # HELP
             embed = discord.Embed(title='Help', description='del accepts an arbitrary number of IDs and SYMBOLS: `(ID|SYMBOL)[ (ID|SYMBOL)...]`')
 
             #\u200b for "no name field"
@@ -189,27 +189,28 @@ class WatchCog(commands.Cog):
             cur.close(); dbh.close()
             return
 
-        embed = discord.Embed(
-            color       = 0x24a36a,
-            title       = 'Success',
-            description = 'Orders recieved. Deleted the following:'
-        )
+        if len(ids):
+            embed = discord.Embed(
+                color       = 0x24a36a,
+                title       = 'Success',
+                description = 'Orders recieved. Deleted the following:'
+            )
 
-        sql = 'UPDATE watch_cog SET status=1 WHERE user=%s AND status=0 AND id=%s'
-        for id in ids: cur.execute(sql, (ctx.author.id,id))
+            sql = 'UPDATE watch_cog SET status=1 WHERE user=%s AND status=0 AND id=%s'
+            for id in ids: cur.execute(sql, (ctx.author.id,id))
 
-        for symbol, deleted in info.items():
-            v = []
-            for d in deleted:
-                s = f"`ID: { d['id'] }"
-                if d['upper']: s += f" | Upper Bound: { self.format_price(d['upper']) }"
-                if d['lower']: s += f" | Lower Bound: { self.format_price(d['lower']) }"
-                s += '`'
-                v.append(s)
+            for symbol, deleted in info.items():
+                v = []
+                for d in deleted:
+                    s = f"`ID: { d['id'] }"
+                    if d['upper']: s += f" | Upper Bound: { self.format_price(d['upper']) }"
+                    if d['lower']: s += f" | Lower Bound: { self.format_price(d['lower']) }"
+                    s += '`'
+                    v.append(s)
 
-            embed.add_field(name=symbol, value='\n'.join(v))
+                embed.add_field(name=symbol, value='\n'.join(v))
 
-        await ctx.channel.send(embed=embed)
+            await ctx.channel.send(embed=embed)
 
         if len(err):
             embed = discord.Embed(title=f"Error: Could not delete the following", description='\n'.join(err), color=0xa33b24)
