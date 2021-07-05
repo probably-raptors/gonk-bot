@@ -33,13 +33,12 @@ class PollCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
-        user = await self.bot.fetch_user(payload.user_id)
-        if user.bot:
+        member = await self.bot.fetch_user(payload.user_id)
+        if member.bot:
             return
 
         if payload.message_id in self.polls.keys():
             poll = self.polls.get(payload.message_id)
-            member = await self.bot.fetch_user(payload.user_id)
             poll.unvote(member)
 
 
