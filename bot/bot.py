@@ -1,13 +1,9 @@
 from discord.ext import commands
-import discord, random, os
 from config import CONFIG
+import discord
 
-# Enable privledged intents for bot
-intents = discord.Intents.default()
-intents.guilds = True
-intents.members = True
 
-bot = commands.Bot(CONFIG["PREFIX"], intents=intents)
+bot = commands.Bot(CONFIG["PREFIX"], intents=discord.Intents.all())
 
 extensions = [
     "modules.ping.cog",

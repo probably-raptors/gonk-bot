@@ -20,9 +20,7 @@ class RolesCog(commands.Cog):
         """A command to manually assign roles to members"""
         """.add Member Role1 Role2 ..."""
 
-        tokens = get_tokens(
-            ctx.message.content
-        )  # automatically strips command from message string
+        tokens = get_tokens(ctx.message.content)
         await update_roles(ctx, tokens, "add")
 
     @commands.command(name="remove", pass_context=True)
@@ -31,9 +29,7 @@ class RolesCog(commands.Cog):
         """A command to manually remove roles from members"""
         """.remove Member Role1 Role2 ..."""
 
-        tokens = get_tokens(
-            ctx.message.content
-        )  # automatically strips command from message string
+        tokens = get_tokens(ctx.message.content)
         await update_roles(ctx, tokens, "remove")
 
     @add_roles.error
