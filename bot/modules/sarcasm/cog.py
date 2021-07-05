@@ -28,8 +28,8 @@ class SarcasmCog(commands.Cog):
         if msg.channel.id in CONFIG["SARCASM_BAN"]:
             return  # prevent the bot from sarcastifying in banned channels
 
-        pattern = "<URL PATTERNS ARE SOOOOOO LONG>"
-        if re.match(pattern, msg):
+        pattern = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+        if re.match(pattern, msg.lower()):
             return  # prevent bot from sarcastifying URLs
 
         if random.randint(1, 100) == 1:
