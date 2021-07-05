@@ -2,6 +2,8 @@ from discord.ext import commands
 from config import CONFIG
 import discord
 import random
+import re
+
 
 
 class SarcasmCog(commands.Cog):
@@ -9,6 +11,7 @@ class SarcasmCog(commands.Cog):
         self.bot = bot
 
     def sarcastify(self, msg):
+        """Convert message string to SaRcAsM tExT"""
         new_msg = ""
         for i, c in enumerate(msg):
             if i % 2:
@@ -20,12 +23,18 @@ class SarcasmCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
-        # REQUIRED, otherwise the bot will also trigger this cog
-        if msg.author.bot or msg.channel.id in CONFIG["SARCASM_BAN"]:
-            return
+        if msg.author.bot:
+            return  # prevent the bot from sarcastifying it's own messages
 
-        # change the range to (1, 1) for testing / trolling
+        if msg.channel.id not in CONFIG["SARCASM_WL"]:
+            return  # prevent the bot from sarcastifying in non-whitelisted channels
+
+        pattern = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+        if re.match(pattern, msg.lower()):
+            return  # prevent bot from sarcastifying URLs
+
         if random.randint(1, 100) == 1:
+            # change the range to (1, 1) for testing / trolling
             new_msg = self.sarcastify(msg.content)
             await msg.channel.send(new_msg)
 
