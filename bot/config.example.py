@@ -1,49 +1,36 @@
-# Config usage:
-#   Copy this file and remove .example ==> 'cp config.example.py config.py'
-#   See Mike or Bryan for any issues or questions.
-
-# TOKENS:
-#    Get tokens from discord dev portal/server, add them to
-#    DISCORD_TOKEN
+# How to use:
+#   Copy this file to the same directory and rename it to "config.py" (no quotes)
 
 import os
 
 CONFIG = {
-    # ADMIN ID, right-click user -> copy id, primary admin of who
-    # should be notified when certain errors occur
-    'ADMIN_NOTIFY': 0,
-
-    # DEV CHANNEL, right-click channel -> copy id ,channel where all
-    # commands are allowed for dev purposes.
-    'DEV_CHANNEL': 0,
-
-    # change this string to your preferred command prefix
-    'PREFIX': '.',
-
-    # change these strings to your prefered admin and default roles
-    'ADMIN_ROLES' : [],
-    'DEFAULT_ROLE': '',
-
-    # Get tokens from discord dev portal/server, add them to
-    'DISCORD_TOKEN' : '',
-
-    # DB config options, unless your dev environment is different,
-    # leave these alone
-    'DBNAME': '',
-    'DBUSER': '',
-    'DBPASS': '',
-    'DBHOST': '',
-
+    # False for dev mode
+    "BOT_LIVE": False,
+    # ADMIN ID, right-click user -> copy id
+    "ADMIN_NOTIFY": 0,
+    # DEV CHANNEL: right-click channel -> copy id
+    "DEV_CHANNEL": 0,
+    # Change this string to your preferred command prefix
+    # Spaces are valid in command prefixes but should be avoided
+    "PREFIX": "/",
+    # Change these strings to your prefered admin and default roles
+    "ADMIN_ROLES": [],
+    "DEFAULT_ROLE": "",
+    # DISCORD_TOKEN: Available in the Discord Developer Portal for your bot
+    "DISCORD_TOKEN": "",
+    # DB config options
+    "DBNAME": "",
+    "DBUSER": "",
+    "DBPASS": "",
+    "DBHOST": "",
     # API Keys
     # COINMARKETCAP
-    'CMCKEY': '', 
-
+    "CMCKEY": "",
     # Coin Watch cog channel
     # right-click channel -> copy id
-    'WATCH_CHANNEL': 0,
-
+    "WATCH_CHANNEL": 0,
     # Sarcasm Cog banned channels
-    'SARCASM_BAN': [
+    "SARCASM_BAN": [
         # right-click channel -> copy id
     ],
 }
