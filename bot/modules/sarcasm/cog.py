@@ -25,8 +25,8 @@ class SarcasmCog(commands.Cog):
         if msg.author.bot:
             return  # prevent the bot from sarcastifying it's own messages
 
-        if msg.channel.id in CONFIG["SARCASM_BAN"]:
-            return  # prevent the bot from sarcastifying in banned channels
+        if msg.channel.id not in CONFIG["SARCASM_WL"]:
+            return  # prevent the bot from sarcastifying in non-whitelisted channels
 
         pattern = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         if re.match(pattern, msg.lower()):
